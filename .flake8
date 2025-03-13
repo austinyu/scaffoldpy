@@ -1,0 +1,6 @@
+[flake8]
+ignore =
+
+exclude =
+
+per-file-ignores =
