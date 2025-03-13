@@ -1,5 +1,11 @@
 [flake8]
 ignore =
+    # line too long (82 > 79 characters)
+    E501,
+    # Name of functions ends with it's first argument name
+    FNE008,
+    # line break before binary operator
+    W503,
 
 exclude =
 

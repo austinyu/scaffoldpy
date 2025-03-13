@@ -1,10 +1,30 @@
 {
   "version": "0.2",
   "ignorePaths": [
+    ".pre-commit-config.yaml",
+    "ruff.toml",
+    ".mypy.ini",
+    ".pylintrc"
   ],
   "dictionaryDefinitions": [],
   "dictionaries": [],
   "words": [
+    "addopts",
+    "autoflake",
+    "codespell",
+    "codspeed",
+    "fstring",
+    "inquirerpy",
+    "isort",
+    "mkdocs",
+    "mkdocstrings",
+    "mypy",
+    "pylint",
+    "pylintrc",
+    "pymdown",
+    "pytest",
+    "sdist",
+    "venv"
   ],
   "ignoreWords": [],
   "import": []

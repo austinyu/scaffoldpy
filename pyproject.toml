@@ -1,47 +1,31 @@
 [build-system]
-requires = ['hatchling', "hatch-vcs", 'hatch-fancy-pypi-readme>=22.5.0']
+requires = ['hatchling', "hatch-vcs"]
 build-backend = 'hatchling.build'
 
 
 [project]
-name = "ujson5"
-description = "A fast JSON5 encoder/decoder for Python"
+name = "create-py-project"
+description = "A cli tool to create a Python project with best practices"
 authors = [{ name = "Austin Yu", email = "yuxm.austin1023@gmail.com" }]
 license = { text = "MIT" }
 requires-python = ">=3.10"
-dependencies = []
-classifiers = [
-    'Development Status :: 2 - Pre-Alpha',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: Implementation :: CPython',
-    'Programming Language :: Python :: Implementation :: PyPy',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3 :: Only',
-    'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',
-    'Programming Language :: Python :: 3.13',
-    'Intended Audience :: Developers',
-    'Intended Audience :: Information Technology',
-    'License :: OSI Approved :: MIT License',
-    'Operating System :: OS Independent',
-    'Topic :: Software Development :: Libraries :: Python Modules',
-    'Topic :: Internet',
+dependencies = [
+    "inquirerpy>=0.3.4",
 ]
+classifiers = []
 dynamic = ['version', 'readme']
 
 [project.urls]
-Homepage = 'https://github.com/austinyu/ujson5'
-Documentation = 'https://austinyu.github.io/ujson5/'
-Source = 'https://github.com/austinyu/ujson5'
+Homepage = 'https://github.com/austinyu/create-py-project'
+# Documentation = 'https://austinyu.github.io/ujson5/'
+Source = 'https://github.com/austinyu/create-py-project'
 # Changelog = TBD
 
 [project.scripts]
-ujson5 = "ujson5.cli:main"
-
+"create-py-project" = "create_py_project.cli:main"
 
 [dependency-groups]
-dev = [
+test = [
     "pytest",
     "pytest-cov",
     "pytest-benchmark",
@@ -49,9 +33,8 @@ dev = [
     "pytest-test-groups",
 ]
 
-pylint = ["pylint"]
-
-flake8 = [
+linters = [
+    "pylint",
     "flake8",
     "flake8-simplify",
     "flake8-mutable",
@@ -61,11 +44,15 @@ flake8 = [
     "flake8-functions-names",
     "flake8-variables-names",
     "flake8-no-implicit-concat",
+    "mypy",
+    "ruff",
+    "isort",
 ]
 
-mypy = ["mypy"]
-
-black = ["black"]
+formatter = [
+    "ruff",
+    "isort",
+]
 
 docs = [
     "mkdocs",
@@ -75,11 +62,8 @@ docs = [
 ]
 
 all = [
-    { include-group = "dev" },
-    { include-group = "pylint" },
-    { include-group = "flake8" },
-    { include-group = "mypy" },
-    { include-group = "black" },
+    { include-group = "test" },
+    { include-group = "linters" },
     { include-group = "docs" },
 ]
 
@@ -89,15 +73,6 @@ default-groups = ['all']
 [tool.hatch.version]
 source = "vcs"
 
-[tool.hatch.metadata.hooks.fancy-pypi-readme]
-content-type = 'text/markdown'
-# construct the PyPI readme from README.md and CHANGELOG.md
-fragments = [
-    {path = 'README.md'},
-    {text = "\n## Changelog\n\n"},
-    {path = 'CHANGELOG.md', pattern = '(.+?)<!-- PyPI README description limit -->'},
-]
-
 [tool.hatch.build.targets.sdist]
 include = [
     '/README.md',
@@ -106,8 +81,8 @@ include = [
     '/tests',
 ]
 
-[tool.bandit]
-skips = ["B101", "B311"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/cpp"]
 
 [tool.pytest.ini_options]
 addopts = """
@@ -117,7 +92,4 @@ addopts = """
 """
 
 [tool.coverage.report]
-exclude_also = ['pytest.skip', 'if sys.version_info < (3, 12): ']
-
-[tool.coverage.run]
-omit = ["tests/test_snapshots/generate_snapshots.py", "tests/test_benchmark.py"]
+exclude_also = ['pytest.skip']
