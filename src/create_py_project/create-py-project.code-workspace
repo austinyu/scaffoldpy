@@ -1,0 +1,25 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "json5.schemas": [
+            {
+                "fileMatch": [
+                    "config_create_py_project.json5"
+                ],
+                "url": "./schema_create_py_project.json"
+            }
+        ],
+        "files.associations": {
+            "*.json5": "json5"
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "blueglassblock.better-json5",
+        ]
+    }
+}

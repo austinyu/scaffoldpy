@@ -11,6 +11,8 @@ license = { text = "MIT" }
 requires-python = ">=3.10"
 dependencies = [
     "inquirerpy>=0.3.4",
+    "pydantic>=2.10.6",
+    "ujson5>=1.0.0",
 ]
 classifiers = []
 dynamic = ['version', 'readme']
@@ -26,7 +28,6 @@ Source = 'https://github.com/austinyu/create-py-project'
 
 [dependency-groups]
 test = [
-    "pytest",
     "pytest-cov",
     "pytest-benchmark",
     "pytest-codspeed",
@@ -67,6 +68,7 @@ all = [
     { include-group = "docs" },
 ]
 
+
 [tool.uv]
 default-groups = ['all']
 
@@ -84,12 +86,6 @@ include = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/cpp"]
 
-[tool.pytest.ini_options]
-addopts = """
-    --cov .
-    --cov-report xml:tests/.coverage/cov.xml
-    --cov-report html:tests/.coverage/html
-"""
 
 [tool.coverage.report]
 exclude_also = ['pytest.skip']

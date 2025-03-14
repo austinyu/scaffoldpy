@@ -6,7 +6,7 @@ ignored-modules=InquirerPy
 
 [MESSAGES CONTROL]
 # Disable the following messages:
-disable=
+disable=E0401, R1705, E1101
 
 [REPORTS]
 # Tells whether to display a full report or only the messages.

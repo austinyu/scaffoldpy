@@ -6,6 +6,8 @@ ignore =
     FNE008,
     # line break before binary operator
     W503,
+    # print statement
+    T201,
 
 exclude =
 

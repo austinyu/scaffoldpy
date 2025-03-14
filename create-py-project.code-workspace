@@ -22,6 +22,22 @@
 		"python.analysis.typeCheckingMode": "standard",
 		"python.analysis.diagnosticSeverityOverrides": {
 
+			"json5.schemas": [
+				{
+					"fileMatch": [
+						"config_create_py_project.json5"
+					],
+					"url": ".src/create_py_project/schema_create_py_project.json"
+				}
+			],
+			"files.associations": {
+				"*.json5": "json5"
+			}
+		},
+		"extensions": {
+			"recommendations": [
+				"blueglassblock.better-json5",
+			]
 		}
 	}
 }

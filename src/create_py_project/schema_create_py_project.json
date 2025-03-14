@@ -1,0 +1,189 @@
+{
+  "$defs": {
+    "ProjectConfig": {
+      "description": "A configuration for a python project.",
+      "properties": {
+        "project_name": {
+          "title": "Project Name",
+          "type": "string",
+        },
+        "pkg_license": {
+          "enum": [
+            "MIT",
+            "GPL",
+            "Apache",
+            "BSD",
+            "Proprietary",
+          ],
+          "title": "Pkg License",
+          "type": "string",
+        },
+        "build_backend": {
+          "anyOf": [
+            {
+              "enum": [
+                "Poetry-core",
+                "Setuptools",
+                "Hatchling",
+                "PDM-backend",
+                "Flit-core",
+              ],
+              "type": "string",
+            },
+            {
+              "type": "null",
+            },
+          ],
+          "title": "Build Backend",
+        },
+        "dependency_manager": {
+          "enum": [
+            "poetry",
+            "uv",
+            "pipenv",
+            "hatch",
+          ],
+          "title": "Dependency Manager",
+          "type": "string",
+        },
+        "static_code_checkers": {
+          "items": {
+            "enum": [
+              "flake8",
+              "mypy",
+              "pyright",
+              "pylint",
+            ],
+            "type": "string",
+          },
+          "title": "Static Code Checkers",
+          "type": "array",
+        },
+        "formatter": {
+          "items": {
+            "enum": [
+              "black",
+              "ruff",
+              "isort",
+            ],
+            "type": "string",
+          },
+          "title": "Formatter",
+          "type": "array",
+        },
+        "spell_checker": {
+          "anyOf": [
+            {
+              "enum": [
+                "cspell",
+                "codespell",
+              ],
+              "type": "string",
+            },
+            {
+              "type": "null",
+            },
+          ],
+          "title": "Spell Checker",
+        },
+        "docs": {
+          "anyOf": [
+            {
+              "enum": [
+                "mkdocs",
+                "sphinx",
+              ],
+              "type": "string",
+            },
+            {
+              "type": "null",
+            },
+          ],
+          "title": "Docs",
+        },
+        "code_editor": {
+          "anyOf": [
+            {
+              "const": "vs_code",
+              "type": "string",
+            },
+            {
+              "type": "null",
+            },
+          ],
+          "title": "Code Editor",
+        },
+        "pre_commit": {
+          "title": "Pre Commit",
+          "type": "boolean",
+        },
+        "cloud_code_base": {
+          "anyOf": [
+            {
+              "const": "github",
+              "type": "string",
+            },
+            {
+              "type": "null",
+            },
+          ],
+          "title": "Cloud Code Base",
+        },
+      },
+      "required": [
+        "project_name",
+        "pkg_license",
+        "build_backend",
+        "dependency_manager",
+        "static_code_checkers",
+        "formatter",
+        "spell_checker",
+        "docs",
+        "code_editor",
+        "pre_commit",
+        "cloud_code_base",
+      ],
+      "title": "ProjectConfig",
+      "type": "object",
+    },
+    "UserConfig": {
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string",
+        },
+        "author_email": {
+          "title": "Author Email",
+          "type": "string",
+        },
+      },
+      "required": [
+        "author",
+        "author_email",
+      ],
+      "title": "UserConfig",
+      "type": "object",
+    },
+  },
+  "properties": {
+    "user_config": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/UserConfig",
+        },
+        {
+          "type": "null",
+        },
+      ],
+    },
+    "project_config": {
+      "$ref": "#/$defs/ProjectConfig",
+    },
+  },
+  "required": [
+    "user_config",
+    "project_config",
+  ],
+  "title": "Config",
+  "type": "object",
+}
