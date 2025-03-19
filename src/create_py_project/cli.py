@@ -1,6 +1,5 @@
 """A simple CLI tool to generate a python project configuration file."""
 
-from typing import Literal
 import argparse
 import os
 import sys
@@ -8,88 +7,24 @@ from pathlib import Path
 
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
-import pydantic
 import ujson5
+from pydantic import ValidationError
 
-if sys.version_info < (3, 12):
-    from typing_extensions import TypedDict
-else:
-    from typing import TypedDict
+from create_py_project.models import (
+    Config,
+    DEFAULT_PROJECT_CONFIG,
+    ProjectConfig,
+    PydConfig,
+    UserConfig,
+)
+from create_py_project import consts
 
 
 DEV_MODE: bool = False
-CONFIG_FNAME: str = "config_create_py_project.json5"
-CONFIG_SCHEMA_FNAME: str = "schema_create_py_project.json"
-DEFAULT_CONFIG_PATH: Path = Path(__file__).parent / CONFIG_FNAME
-
-
-class ProjectConfig(TypedDict):
-    """A configuration for a python project."""
-
-    project_name: str
-    pkg_license: Literal["MIT", "GPL", "Apache", "BSD", "Proprietary"]
-    # build backends are used to build and distribute your project as a package
-    build_backend: (
-        Literal["Poetry-core", "Setuptools", "Hatchling", "PDM-backend", "Flit-core"] | None
-    )
-    # dependency managers are used to manage your project's dependencies
-    dependency_manager: Literal["poetry", "uv", "pipenv", "hatch"]
-    # static code checkers are used to check your code for errors
-    static_code_checkers: list[Literal["flake8", "mypy", "pyright", "pylint"]]
-    # formatters are used to format your code
-    formatter: list[Literal["black", "ruff", "isort"]]
-    # spell checkers are used to check spelling in your code
-    spell_checker: Literal["cspell", "codespell"] | None
-    # documentation generators are used to generate documentation for your project
-    docs: Literal["mkdocs", "sphinx"] | None
-    # code editors are used to edit your code
-    code_editor: Literal["vs_code"] | None
-    # pre-commit is used to run checks before committing code
-    pre_commit: bool
-    # cloud code bases are used to host your project's source code
-    cloud_code_base: Literal["github"] | None
-
-
-class UserConfig(TypedDict):
-    """A configuration for a user."""
-
-    author: str
-    author_email: str
-
-
-class Config(TypedDict):
-    """A configuration for a python project."""
-
-    user_config: UserConfig | None
-    project_config: ProjectConfig
-
-
-PydConfig = pydantic.TypeAdapter(Config)
-
-DEFAULT_PROJECT_CONFIG: ProjectConfig = {
-    "project_name": "",
-    "pkg_license": "MIT",
-    "build_backend": "Hatchling",
-    "dependency_manager": "uv",
-    "static_code_checkers": ["flake8", "mypy", "pyright", "pylint"],
-    "formatter": ["black", "isort"],
-    "spell_checker": "cspell",
-    "docs": "mkdocs",
-    "code_editor": "vs_code",
-    "pre_commit": True,
-    "cloud_code_base": "github",
-}
-
-DEFAULT_CONFIG: Config = {
-    "user_config": None,
-    "project_config": DEFAULT_PROJECT_CONFIG,
-}
 
 
 def prompt_for_user_config() -> UserConfig:
     """Prompt the user for configuration options."""
-    print("👋 Looks like you're running this tool for the first time.")
-    print("Let's start by setting up your user configuration. 🛠️")
     author: str = inquirer.text(
         message="👤 What's your name:",
         validate=lambda result: len(result) > 0,
@@ -115,6 +50,27 @@ def prompt_for_project_config(config: ProjectConfig) -> ProjectConfig:
         message="🐍 What's your python project name:",
         validate=lambda result: len(result) > 0,
         invalid_message="Project name cannot be empty.",
+    ).execute()
+
+    config["min_py_version"] = inquirer.select(
+        message="🐍 Select the minimum python version for your project:",
+        choices=[
+            Choice(value="3.9", name="3.9"),
+            Choice(value="3.10", name="3.10"),
+            Choice(value="3.8", name="3.11"),
+            Choice(value="3.7", name="3.12"),
+            Choice(value="3.6", name="3.13"),
+        ],
+        default="3.10",
+    ).execute()
+
+    config["layout"] = inquirer.select(
+        message="📁 Select a layout for your project:",
+        choices=[
+            Choice(value="src"),
+            Choice(value="flat"),
+        ],
+        default="src",
     ).execute()
 
     config["build_backend"] = inquirer.select(
@@ -280,44 +236,94 @@ def _get_appdata_path() -> Path:
 def build_project(config: Config) -> None:
     """Build a python project based on the configuration."""
     print("🚧 Building your project...")
+    print(config)
 
 
-def main():
+def dump_config(path: Path, config: Config) -> None:
+    """Dump the configuration to a file."""
+    with open(path, "w", encoding="utf8") as f:
+        ujson5.dump(config, f, Config, indent=2)
+
+
+def dump_schema(path: Path) -> None:
+    """Dump the schema to a file."""
+    with open(path, "w", encoding="utf8") as f:
+        ujson5.dump(PydConfig.json_schema(), f, indent=2)
+
+
+def copy_workspace_file(dest_folder: Path) -> None:
+    """Copy a workspace file to the project directory."""
+    workspace_file = Path(__file__).parent / consts.SELF_WSP_FNAME
+    destination = dest_folder / consts.SELF_WSP_FNAME
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        destination.write_text(workspace_file.read_text(encoding="utf8"), encoding="utf8")
+    except FileNotFoundError as e:
+        print(f"❌ Failed to copy workspace file: {e}")
+
+
+def main() -> None:
     """Main entry point for the CLI tool."""
     if DEV_MODE:
-        config_path = Path(__file__) / CONFIG_FNAME
-        valid_config = DEFAULT_CONFIG.copy()
+        config_folder = Path(__file__).parent
+        config_path = config_folder / consts.SELF_CONFIG_FNAME
+        user_config: UserConfig | None = None
+        project_config: ProjectConfig = DEFAULT_PROJECT_CONFIG.copy()
     else:
-        config_path = _get_appdata_path() / "create_py_project" / CONFIG_FNAME
-        if config_path.exists():
+        config_folder = _get_appdata_path() / "create_py_project"
+        config_path = config_folder / consts.SELF_CONFIG_FNAME
+        try:
             with open(config_path, "r", encoding="utf8") as f:
-                valid_config = PydConfig.validate_json(f.read())
-        else:
-            valid_config = DEFAULT_CONFIG.copy()
-    if valid_config["user_config"] is None:
-        valid_config["user_config"] = prompt_for_user_config()
-        valid_config["project_config"] = prompt_for_project_config(
-            valid_config["project_config"]
+                config = PydConfig.validate_json(f.read())
+                user_config = config["user_config"]
+            print(f"🌟 Welcome back {user_config['author']}!")
+        except FileNotFoundError:
+            print("👋 Looks like you're running this tool for the first time.")
+            print("Let's start by setting up your user configuration. 🛠️")
+            user_config = None
+            project_config = DEFAULT_PROJECT_CONFIG.copy()
+            copy_workspace_file(config_folder)
+        except ValidationError:
+            print("⚠️ Looks like your configuration file is corrupt.")
+            print("Don't worry! Let's set up your configuration again. 🛠️")
+            user_config = None
+            project_config = DEFAULT_PROJECT_CONFIG.copy()
+    if user_config is None:
+        user_config = prompt_for_user_config()
+        project_config = prompt_for_project_config(project_config)
+        dump_config(
+            config_path,
+            {
+                "user_config": user_config,
+                "project_config": project_config,
+            },
         )
+        dump_schema(config_folder / consts.SELF_CONFIG_SCHEMA_FNAME)
     else:
-        print(f"👋 Welcome back {valid_config['user_config']['author']}!")
         use_prev = inquirer.confirm(
             message="👀 Would you like to use your previous configuration?", default=True
         ).execute()
         if not use_prev:
             print("No problem! Let's update your configuration. 🛠️")
-            valid_config["project_config"] = prompt_for_project_config(
-                valid_config["project_config"]
-            )
+            project_config = prompt_for_project_config(project_config)
             save_config = inquirer.confirm(
                 message="💾 Would you like to save this configuration for future use?",
                 default=True,
             ).execute()
             if save_config:
-                with open(config_path, "w", encoding="utf8") as f:
-                    ujson5.dump(valid_config, f, Config, indent=2)
-    print(valid_config)
-    build_project(valid_config)
+                dump_config(
+                    config_path,
+                    {
+                        "user_config": user_config,
+                        "project_config": project_config,
+                    },
+                )
+    build_project(
+        {
+            "user_config": user_config,
+            "project_config": project_config,
+        }
+    )
 
 
 if __name__ == "__main__":
@@ -334,10 +340,18 @@ if __name__ == "__main__":
     parsed_args = args.parse_args()
 
     if parsed_args.update:
-        with open(Path(__file__).parent / CONFIG_SCHEMA_FNAME, "w", encoding="utf8") as f:
-            ujson5.dump(PydConfig.json_schema(), f, indent=2)
-        with open(DEFAULT_CONFIG_PATH, "w", encoding="utf8") as f:
-            ujson5.dump(DEFAULT_CONFIG, f, Config, indent=2)
+        folder_path = Path(__file__).parent
+        dump_schema(folder_path / consts.SELF_CONFIG_SCHEMA_FNAME)
+        dump_config(
+            folder_path / consts.SELF_CONFIG_FNAME,
+            {
+                "user_config": {
+                    "author": "",
+                    "author_email": "",
+                },
+                "project_config": DEFAULT_PROJECT_CONFIG,
+            },
+        )
         print("✅ Configuration schema and default configuration updated.")
         sys.exit(0)
 

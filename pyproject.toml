@@ -7,39 +7,54 @@ build-backend = 'hatchling.build'
 name = "create-py-project"
 description = "A cli tool to create a Python project with best practices"
 authors = [{ name = "Austin Yu", email = "yuxm.austin1023@gmail.com" }]
+maintainers = [{ name = "Austin Yu", email = "yuxm.austin1023@gmail.com" }]
 license = { text = "MIT" }
+keywords = []
 requires-python = ">=3.10"
 dependencies = [
     "inquirerpy>=0.3.4",
     "pydantic>=2.10.6",
+    "toml>=0.10.2",
+    "types-toml>=0.10.8.20240310",
     "ujson5>=1.0.0",
 ]
 classifiers = []
 dynamic = ['version', 'readme']
 
+[project.optional-dependencies]
+# Some dependencies are only needed for certain features
+# For example, you can define optional dependencies like this
+# ```
+# gui = ["PyQt5"]
+# cli = ["click"]
+# ```
+# Users can optionally install these dependencies by running `pip install package[gui]`
+# or `pip install package[cli]`
+
 [project.urls]
 Homepage = 'https://github.com/austinyu/create-py-project'
 # Documentation = 'https://austinyu.github.io/ujson5/'
 Source = 'https://github.com/austinyu/create-py-project'
+Issues = "https://todo.com"
 # Changelog = TBD
 
 [project.scripts]
 "create-py-project" = "create_py_project.cli:main"
 
 [dependency-groups]
-test = [
+tests = [
+    "pytest",
     "pytest-cov",
     "pytest-benchmark",
     "pytest-codspeed",
     "pytest-test-groups",
 ]
 
-linters = [
+static_checkers = [
     "pylint",
     "flake8",
     "flake8-simplify",
     "flake8-mutable",
-    "flake8-print",
     "flake8-use-fstring",
     "flake8-builtins",
     "flake8-functions-names",
@@ -47,10 +62,9 @@ linters = [
     "flake8-no-implicit-concat",
     "mypy",
     "ruff",
-    "isort",
 ]
 
-formatter = [
+formatters = [
     "ruff",
     "isort",
 ]
@@ -63,9 +77,10 @@ docs = [
 ]
 
 all = [
-    { include-group = "test" },
-    { include-group = "linters" },
+    { include-group = "tests" },
+    { include-group = "static_checkers" },
     { include-group = "docs" },
+    { include-group = "formatters" },
 ]
 
 

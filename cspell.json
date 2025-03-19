@@ -8,7 +8,7 @@
     "src/create_py_project/create-py-project.code-workspace",
     "src/create_py_project/*.json5",
     "src/create_py_project/*.json",
-    "create-py-project.code-workspace",
+    "create-py-project.code-workspace"
   ],
   "dictionaryDefinitions": [],
   "dictionaries": [],
@@ -28,6 +28,7 @@
     "pylintrc",
     "pymdown",
     "pytest",
+    "releasenotes",
     "sdist",
     "sysname",
     "ujson",
