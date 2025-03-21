@@ -272,144 +272,6 @@ toml = [
 ]
 
 [[package]]
-name = "create-py-project"
-source = { editable = "." }
-dependencies = [
-    { name = "inquirerpy" },
-    { name = "pydantic" },
-    { name = "toml" },
-    { name = "types-toml" },
-    { name = "ujson5" },
-]
-
-[package.dev-dependencies]
-all = [
-    { name = "flake8" },
-    { name = "flake8-builtins" },
-    { name = "flake8-functions-names" },
-    { name = "flake8-mutable" },
-    { name = "flake8-no-implicit-concat" },
-    { name = "flake8-simplify" },
-    { name = "flake8-use-fstring" },
-    { name = "flake8-variables-names" },
-    { name = "isort" },
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
-    { name = "mkdocstrings-python" },
-    { name = "mypy" },
-    { name = "pylint" },
-    { name = "pymdown-extensions" },
-    { name = "pytest" },
-    { name = "pytest-benchmark" },
-    { name = "pytest-codspeed" },
-    { name = "pytest-cov" },
-    { name = "pytest-mock" },
-    { name = "pytest-test-groups" },
-    { name = "ruff" },
-    { name = "types-toml" },
-]
-docs = [
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
-    { name = "mkdocstrings-python" },
-    { name = "pymdown-extensions" },
-]
-formatters = [
-    { name = "isort" },
-    { name = "ruff" },
-]
-static-checkers = [
-    { name = "flake8" },
-    { name = "flake8-builtins" },
-    { name = "flake8-functions-names" },
-    { name = "flake8-mutable" },
-    { name = "flake8-no-implicit-concat" },
-    { name = "flake8-simplify" },
-    { name = "flake8-use-fstring" },
-    { name = "flake8-variables-names" },
-    { name = "mypy" },
-    { name = "pylint" },
-    { name = "ruff" },
-    { name = "types-toml" },
-]
-tests = [
-    { name = "pytest" },
-    { name = "pytest-benchmark" },
-    { name = "pytest-codspeed" },
-    { name = "pytest-cov" },
-    { name = "pytest-mock" },
-    { name = "pytest-test-groups" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "inquirerpy", specifier = ">=0.3.4" },
-    { name = "pydantic", specifier = ">=2.10.6" },
-    { name = "toml", specifier = ">=0.10.2" },
-    { name = "types-toml", specifier = ">=0.10.8.20240310" },
-    { name = "ujson5", specifier = ">=1.0.1" },
-]
-
-[package.metadata.requires-dev]
-all = [
-    { name = "flake8" },
-    { name = "flake8-builtins" },
-    { name = "flake8-functions-names" },
-    { name = "flake8-mutable" },
-    { name = "flake8-no-implicit-concat" },
-    { name = "flake8-simplify" },
-    { name = "flake8-use-fstring" },
-    { name = "flake8-variables-names" },
-    { name = "isort" },
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
-    { name = "mkdocstrings-python" },
-    { name = "mypy" },
-    { name = "pylint" },
-    { name = "pymdown-extensions" },
-    { name = "pytest" },
-    { name = "pytest-benchmark" },
-    { name = "pytest-codspeed" },
-    { name = "pytest-cov" },
-    { name = "pytest-mock", specifier = ">=3.14.0" },
-    { name = "pytest-test-groups" },
-    { name = "ruff" },
-    { name = "types-toml" },
-]
-docs = [
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
-    { name = "mkdocstrings-python" },
-    { name = "pymdown-extensions" },
-]
-formatters = [
-    { name = "isort" },
-    { name = "ruff" },
-]
-static-checkers = [
-    { name = "flake8" },
-    { name = "flake8-builtins" },
-    { name = "flake8-functions-names" },
-    { name = "flake8-mutable" },
-    { name = "flake8-no-implicit-concat" },
-    { name = "flake8-simplify" },
-    { name = "flake8-use-fstring" },
-    { name = "flake8-variables-names" },
-    { name = "mypy" },
-    { name = "pylint" },
-    { name = "ruff" },
-    { name = "types-toml" },
-]
-tests = [
-    { name = "pytest" },
-    { name = "pytest-benchmark" },
-    { name = "pytest-codspeed" },
-    { name = "pytest-cov" },
-    { name = "pytest-mock", specifier = ">=3.14.0" },
-    { name = "pytest-test-groups" },
-]
-
-[[package]]
 name = "dill"
 version = "0.3.9"
 source = { registry = "https://pypi.org/simple" }
@@ -1299,6 +1161,144 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d6/ec/054f9879fb6f4122d43ffe5c9f88c8c323a9cd14220d5c813aea5805e02c/ruff-0.10.0-py3-none-win32.whl", hash = "sha256:76e2de0cbdd587e373cd3b4050d2c45babdd7014c1888a6f121c29525c748a15", size = 10272077 },
     { url = "https://files.pythonhosted.org/packages/6e/49/915d8682f24645b904fe6a1aac36101464fc814923fdf293c1388dc5533c/ruff-0.10.0-py3-none-win_amd64.whl", hash = "sha256:f943acdecdcc6786a8d1dad455dd9f94e6d57ccc115be4993f9b52ef8316027a", size = 11393300 },
     { url = "https://files.pythonhosted.org/packages/82/ed/5c59941634c9026ceeccc7c119f23f4356f09aafd28c15c1bc734ac66b01/ruff-0.10.0-py3-none-win_arm64.whl", hash = "sha256:935a943bdbd9ff0685acd80d484ea91088e27617537b5f7ef8907187d19d28d0", size = 10510133 },
+]
+
+[[package]]
+name = "scaffoldpy"
+source = { editable = "." }
+dependencies = [
+    { name = "inquirerpy" },
+    { name = "pydantic" },
+    { name = "toml" },
+    { name = "types-toml" },
+    { name = "ujson5" },
+]
+
+[package.dev-dependencies]
+all = [
+    { name = "flake8" },
+    { name = "flake8-builtins" },
+    { name = "flake8-functions-names" },
+    { name = "flake8-mutable" },
+    { name = "flake8-no-implicit-concat" },
+    { name = "flake8-simplify" },
+    { name = "flake8-use-fstring" },
+    { name = "flake8-variables-names" },
+    { name = "isort" },
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mkdocstrings-python" },
+    { name = "mypy" },
+    { name = "pylint" },
+    { name = "pymdown-extensions" },
+    { name = "pytest" },
+    { name = "pytest-benchmark" },
+    { name = "pytest-codspeed" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "pytest-test-groups" },
+    { name = "ruff" },
+    { name = "types-toml" },
+]
+docs = [
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mkdocstrings-python" },
+    { name = "pymdown-extensions" },
+]
+formatters = [
+    { name = "isort" },
+    { name = "ruff" },
+]
+static-checkers = [
+    { name = "flake8" },
+    { name = "flake8-builtins" },
+    { name = "flake8-functions-names" },
+    { name = "flake8-mutable" },
+    { name = "flake8-no-implicit-concat" },
+    { name = "flake8-simplify" },
+    { name = "flake8-use-fstring" },
+    { name = "flake8-variables-names" },
+    { name = "mypy" },
+    { name = "pylint" },
+    { name = "ruff" },
+    { name = "types-toml" },
+]
+tests = [
+    { name = "pytest" },
+    { name = "pytest-benchmark" },
+    { name = "pytest-codspeed" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "pytest-test-groups" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "inquirerpy", specifier = ">=0.3.4" },
+    { name = "pydantic", specifier = ">=2.10.6" },
+    { name = "toml", specifier = ">=0.10.2" },
+    { name = "types-toml", specifier = ">=0.10.8.20240310" },
+    { name = "ujson5", specifier = ">=1.0.1" },
+]
+
+[package.metadata.requires-dev]
+all = [
+    { name = "flake8" },
+    { name = "flake8-builtins" },
+    { name = "flake8-functions-names" },
+    { name = "flake8-mutable" },
+    { name = "flake8-no-implicit-concat" },
+    { name = "flake8-simplify" },
+    { name = "flake8-use-fstring" },
+    { name = "flake8-variables-names" },
+    { name = "isort" },
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mkdocstrings-python" },
+    { name = "mypy" },
+    { name = "pylint" },
+    { name = "pymdown-extensions" },
+    { name = "pytest" },
+    { name = "pytest-benchmark" },
+    { name = "pytest-codspeed" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock", specifier = ">=3.14.0" },
+    { name = "pytest-test-groups" },
+    { name = "ruff" },
+    { name = "types-toml" },
+]
+docs = [
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mkdocstrings-python" },
+    { name = "pymdown-extensions" },
+]
+formatters = [
+    { name = "isort" },
+    { name = "ruff" },
+]
+static-checkers = [
+    { name = "flake8" },
+    { name = "flake8-builtins" },
+    { name = "flake8-functions-names" },
+    { name = "flake8-mutable" },
+    { name = "flake8-no-implicit-concat" },
+    { name = "flake8-simplify" },
+    { name = "flake8-use-fstring" },
+    { name = "flake8-variables-names" },
+    { name = "mypy" },
+    { name = "pylint" },
+    { name = "ruff" },
+    { name = "types-toml" },
+]
+tests = [
+    { name = "pytest" },
+    { name = "pytest-benchmark" },
+    { name = "pytest-codspeed" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock", specifier = ">=3.14.0" },
+    { name = "pytest-test-groups" },
 ]
 
 [[package]]

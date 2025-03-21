@@ -5,10 +5,10 @@
     "ruff.toml",
     ".mypy.ini",
     ".pylintrc",
-    "src/create_py_project/_config/create-py-project.code-workspace",
-    "src/create_py_project/_config/*.json5",
-    "src/create_py_project/_config/*.json",
-    "create-py-project.code-workspace"
+    "src/scaffoldpy/_config/scaffoldpy.code-workspace",
+    "src/scaffoldpy/_config/*.json5",
+    "src/scaffoldpy/_config/*.json",
+    "scaffoldpy.code-workspace"
   ],
   "dictionaryDefinitions": [],
   "dictionaries": [],
@@ -30,6 +30,7 @@
     "pyrightconfig",
     "pytest",
     "releasenotes",
+    "scaffoldpy",
     "sdist",
     "sysname",
     "ujson",

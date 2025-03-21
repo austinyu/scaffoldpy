@@ -10,9 +10,9 @@ from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 from pydantic import ValidationError
 
-from create_py_project import consts
-from create_py_project.builders import build_basic_project
-from create_py_project.models import (
+from scaffoldpy import consts
+from scaffoldpy.builders import build_basic_project
+from scaffoldpy.models import (
     DEFAULT_PROJECT_CONFIG,
     Config,
     ProjectConfig,

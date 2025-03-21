@@ -4,7 +4,7 @@ build-backend = 'hatchling.build'
 
 
 [project]
-name = "create-py-project"
+name = "scaffoldpy"
 description = "A cli tool to create a Python project with best practices"
 authors = [{ name = "Austin Yu", email = "yuxm.austin1023@gmail.com" }]
 maintainers = [{ name = "Austin Yu", email = "yuxm.austin1023@gmail.com" }]
@@ -22,7 +22,7 @@ classifiers = []
 dynamic = ['version', 'readme']
 
 [project.scripts]
-create-py-project = "create_py_project.cli:main"
+scaffoldpy = "scaffoldpy.cli:main"
 
 [project.optional-dependencies]
 # Some dependencies are only needed for certain features
@@ -35,9 +35,9 @@ create-py-project = "create_py_project.cli:main"
 # or `pip install package[cli]`
 
 [project.urls]
-Homepage = 'https://github.com/austinyu/create-py-project'
+Homepage = 'https://github.com/austinyu/scaffoldpy'
 # Documentation = 'https://austinyu.github.io/ujson5/'
-Source = 'https://github.com/austinyu/create-py-project'
+Source = 'https://github.com/austinyu/scaffoldpy'
 Issues = "https://todo.com"
 # Changelog = TBD
 
@@ -101,7 +101,7 @@ include = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/create_py_project"]
+packages = ["src/scaffoldpy"]
 
 
 [tool.coverage.report]
