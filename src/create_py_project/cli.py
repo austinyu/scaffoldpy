@@ -5,20 +5,20 @@ import os
 import sys
 from pathlib import Path
 
+import ujson5
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
-import ujson5
 from pydantic import ValidationError
 
+from create_py_project import consts
+from create_py_project.builders import build_basic_project
 from create_py_project.models import (
-    Config,
     DEFAULT_PROJECT_CONFIG,
+    Config,
     ProjectConfig,
     PydConfig,
     UserConfig,
 )
-from create_py_project import consts
-
 
 DEV_MODE: bool = False
 
@@ -233,12 +233,6 @@ def _get_appdata_path() -> Path:
         raise OSError("Unsupported operating system")
 
 
-def build_project(config: Config) -> None:
-    """Build a python project based on the configuration."""
-    print("🚧 Building your project...")
-    print(config)
-
-
 def dump_config(path: Path, config: Config) -> None:
     """Dump the configuration to a file."""
     with open(path, "w", encoding="utf8") as f:
@@ -298,6 +292,7 @@ def main() -> None:
                 "project_config": project_config,
             },
         )
+        print(f"✅ Configuration saved at {config_path}.")
         dump_schema(config_folder / consts.SELF_CONFIG_SCHEMA_FNAME)
     else:
         use_prev = inquirer.confirm(
@@ -318,7 +313,8 @@ def main() -> None:
                         "project_config": project_config,
                     },
                 )
-    build_project(
+                print(f"✅ Configuration saved at {config_path}.")
+    build_basic_project(
         {
             "user_config": user_config,
             "project_config": project_config,

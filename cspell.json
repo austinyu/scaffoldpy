@@ -27,6 +27,7 @@
     "pylint",
     "pylintrc",
     "pymdown",
+    "pyrightconfig",
     "pytest",
     "releasenotes",
     "sdist",

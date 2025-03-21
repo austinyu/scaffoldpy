@@ -16,10 +16,13 @@ dependencies = [
     "pydantic>=2.10.6",
     "toml>=0.10.2",
     "types-toml>=0.10.8.20240310",
-    "ujson5>=1.0.0",
+    "ujson5>=1.0.1",
 ]
 classifiers = []
 dynamic = ['version', 'readme']
+
+[project.scripts]
+create-py-project = "create_py_project.cli:main"
 
 [project.optional-dependencies]
 # Some dependencies are only needed for certain features
@@ -37,9 +40,6 @@ Homepage = 'https://github.com/austinyu/create-py-project'
 Source = 'https://github.com/austinyu/create-py-project'
 Issues = "https://todo.com"
 # Changelog = TBD
-
-[project.scripts]
-"create-py-project" = "create_py_project.cli:main"
 
 [dependency-groups]
 tests = [
@@ -99,7 +99,7 @@ include = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/cpp"]
+packages = ["src/create_py_project"]
 
 
 [tool.coverage.report]

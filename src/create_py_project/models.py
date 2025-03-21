@@ -1,7 +1,7 @@
 """Models for the create_py_project package."""
 
 import sys
-from typing import Literal, Any
+from typing import Any, Literal
 
 import pydantic
 
@@ -66,7 +66,7 @@ DEFAULT_PROJECT_CONFIG: ProjectConfig = {
     "build_backend": "Hatchling",
     "dependency_manager": "uv",
     "static_code_checkers": ["flake8", "mypy", "pyright", "pylint"],
-    "formatter": ["black", "isort"],
+    "formatter": ["ruff", "isort"],
     "spell_checker": "cspell",
     "docs": "mkdocs",
     "code_editor": "vs_code",
@@ -125,5 +125,4 @@ ProjectToml = TypedDict(
         "dependency-groups": Dependencies,
         "tool": Any,
     },
-    total=False,
 )
