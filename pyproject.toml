@@ -48,6 +48,7 @@ tests = [
     "pytest-benchmark",
     "pytest-codspeed",
     "pytest-test-groups",
+    "pytest-mock>=3.14.0",
 ]
 
 static_checkers = [
@@ -62,6 +63,7 @@ static_checkers = [
     "flake8-no-implicit-concat",
     "mypy",
     "ruff",
+    "types-toml",
 ]
 
 formatters = [

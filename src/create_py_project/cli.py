@@ -186,7 +186,8 @@ def prompt_for_project_config(config: ProjectConfig) -> ProjectConfig:
         message="📝 Select a code editor for your project:",
         choices=[
             Choice(
-                value="vscode", name="Visual Studio Code (https://code.visualstudio.com/) 💻"
+                value="vscode",
+                name="Visual Studio Code (https://code.visualstudio.com/) 💻",
             ),
             Choice(value=None, name="No code editor ❌"),
         ],
@@ -247,19 +248,41 @@ def dump_schema(path: Path) -> None:
 
 def copy_workspace_file(dest_folder: Path) -> None:
     """Copy a workspace file to the project directory."""
-    workspace_file = Path(__file__).parent / consts.SELF_WSP_FNAME
+    workspace_file = Path(__file__).parent / consts.CONFIG_FOLDER / consts.SELF_WSP_FNAME
     destination = dest_folder / consts.SELF_WSP_FNAME
     destination.parent.mkdir(parents=True, exist_ok=True)
+
     try:
-        destination.write_text(workspace_file.read_text(encoding="utf8"), encoding="utf8")
+        with open(destination, "w", encoding="utf8") as f:
+            f.write(workspace_file.read_text(encoding="utf8"))
     except FileNotFoundError as e:
         print(f"❌ Failed to copy workspace file: {e}")
 
 
 def main() -> None:
     """Main entry point for the CLI tool."""
+    main_args = argparse.ArgumentParser()
+    main_args.add_argument(
+        "-s",
+        "--skip-config",
+        action="store_true",
+        help="Skip the configuration process and generate a basic project.",
+    )
+
+    if main_args.parse_args().skip_config:
+        build_basic_project(
+            {
+                "user_config": {
+                    "author": "John",
+                    "author_email": "",
+                },
+                "project_config": DEFAULT_PROJECT_CONFIG,
+            }
+        )
+        return
+
     if DEV_MODE:
-        config_folder = Path(__file__).parent
+        config_folder = Path(__file__).parent / consts.CONFIG_FOLDER
         config_path = config_folder / consts.SELF_CONFIG_FNAME
         user_config: UserConfig | None = None
         project_config: ProjectConfig = DEFAULT_PROJECT_CONFIG.copy()
@@ -296,7 +319,8 @@ def main() -> None:
         dump_schema(config_folder / consts.SELF_CONFIG_SCHEMA_FNAME)
     else:
         use_prev = inquirer.confirm(
-            message="👀 Would you like to use your previous configuration?", default=True
+            message="👀 Would you like to use your previous configuration?",
+            default=True,
         ).execute()
         if not use_prev:
             print("No problem! Let's update your configuration. 🛠️")
@@ -332,14 +356,21 @@ if __name__ == "__main__":
         action="store_true",
         help="Update the configuration file and save configuration schema.",
     )
+    args.add_argument(
+        "-s",
+        "--skip-config",
+        action="store_true",
+        help="Skip the configuration process and generate a basic project.",
+    )
 
     parsed_args = args.parse_args()
 
     if parsed_args.update:
-        folder_path = Path(__file__).parent
-        dump_schema(folder_path / consts.SELF_CONFIG_SCHEMA_FNAME)
+        config_folder_path = Path(__file__).parent / consts.CONFIG_FOLDER
+        config_folder_path.mkdir(parents=True, exist_ok=True)
+        dump_schema(config_folder_path / consts.SELF_CONFIG_SCHEMA_FNAME)
         dump_config(
-            folder_path / consts.SELF_CONFIG_FNAME,
+            config_folder_path / consts.SELF_CONFIG_FNAME,
             {
                 "user_config": {
                     "author": "",
@@ -350,5 +381,3 @@ if __name__ == "__main__":
         )
         print("✅ Configuration schema and default configuration updated.")
         sys.exit(0)
-
-    main()

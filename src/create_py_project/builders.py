@@ -33,6 +33,18 @@ PRE_COMMIT_CONTENT = """repos:
 
 """
 
+CODE_WORKSPACE_CONTENT = """{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+    }
+}
+
+"""
+
 
 def build_toml(config: models.Config) -> models.ProjectToml:
     """Build a pyproject.toml file from a configuration."""
@@ -168,6 +180,33 @@ def build_formatter(config: models.Config, project_root: Path) -> None:
         toml.dump(project_toml, f)
 
 
+def build_editor_config(config: models.Config, project_root: Path) -> None:
+    """Build a code editor configuration file."""
+    if config["project_config"]["code_editor"] == "vs_code":
+        with open(project_root / consts.SELF_WSP_FNAME, "w", encoding="utf-8") as f:
+            f.write(CODE_WORKSPACE_CONTENT)
+
+
+def build_docs(config: models.Config, project_root: Path) -> None:
+    if config["project_config"]["docs"] is None:
+        return
+    if config["project_config"]["docs"] == "mkdocs":
+        with open(project_root / "mkdocs.yml", "w", encoding="utf-8") as f:
+            f.write("site_name: My Docs\n\n")
+    elif config["project_config"]["docs"] == "sphinx":
+        pass
+
+
+def build_cloud_code_base(config: models.Config, project_root: Path) -> None:
+    if config["project_config"]["cloud_code_base"] is None:
+        return
+    if config["project_config"]["cloud_code_base"] == "github":
+        action_path = project_root / ".github" / "workflows"
+        action_path.mkdir(parents=True)
+        with open(project_root / ".github/workflows/main.yml", "w", encoding="utf-8") as f:
+            f.write("name: CI\n\n")
+
+
 def build_basic_project(config: models.Config) -> None:
     """Build a basic Python project."""
     print("🚧 Building your project...")
@@ -177,7 +216,7 @@ def build_basic_project(config: models.Config) -> None:
         sys.exit(1)
 
     project_toml: models.ProjectToml = build_toml(config)
-
+    project_root.mkdir()
     with open(project_root / consts.PYPROJECT_TOML_FNAME, "w", encoding="utf-8") as f:
         toml.dump(project_toml, f)
 
@@ -199,5 +238,8 @@ def build_basic_project(config: models.Config) -> None:
 
     build_static_checkers(config, project_root)
     build_formatter(config, project_root)
+    build_editor_config(config, project_root)
+    build_docs(config, project_root)
+    build_cloud_code_base(config, project_root)
 
     print(f"🎉 Project {config['project_config']['project_name']} created successfully.")

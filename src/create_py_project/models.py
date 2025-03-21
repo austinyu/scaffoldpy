@@ -58,7 +58,7 @@ class Config(TypedDict):
 PydConfig = pydantic.TypeAdapter(Config)
 
 DEFAULT_PROJECT_CONFIG: ProjectConfig = {
-    "project_name": "",
+    "project_name": "example",
     "pkg_license": "MIT",
     "min_py_version": "3.10",
     "layout": "src",

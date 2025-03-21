@@ -1,0 +1,39 @@
+{
+  "user_config": {
+    "author": "",
+    "author_email": "",
+  },
+  "project_config": {
+    "project_name": "",
+    "pkg_license": "MIT",
+    "min_py_version": "3.10",
+    "layout": "src",
+    "configuration_preference": "stand_alone",
+    // build backends are used to build and distribute your project as a package
+    "build_backend": "Hatchling",
+    // dependency managers are used to manage your project's dependencies
+    "dependency_manager": "uv",
+    // static code checkers are used to check your code for errors
+    "static_code_checkers": [
+      "flake8",
+      "mypy",
+      "pyright",
+      "pylint",
+    ],
+    // formatters are used to format your code
+    "formatter": [
+      "ruff",
+      "isort",
+    ],
+    // spell checkers are used to check spelling in your code
+    "spell_checker": "cspell",
+    // documentation generators are used to generate documentation for your project
+    "docs": "mkdocs",
+    // code editors are used to edit your code
+    "code_editor": "vs_code",
+    // pre-commit is used to run checks before committing code
+    "pre_commit": true,
+    // cloud code bases are used to host your project's source code
+    "cloud_code_base": "github",
+  },
+}

@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 
+CONFIG_FOLDER = "_config"
 README_FNAME = "README.md"
 PYPROJECT_TOML_FNAME = "pyproject.toml"
 SELF_CONFIG_FNAME: str = "config_create_py_project.json5"

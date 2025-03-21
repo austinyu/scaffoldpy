@@ -5,9 +5,9 @@
     "ruff.toml",
     ".mypy.ini",
     ".pylintrc",
-    "src/create_py_project/create-py-project.code-workspace",
-    "src/create_py_project/*.json5",
-    "src/create_py_project/*.json",
+    "src/create_py_project/_config/create-py-project.code-workspace",
+    "src/create_py_project/_config/*.json5",
+    "src/create_py_project/_config/*.json",
     "create-py-project.code-workspace"
   ],
   "dictionaryDefinitions": [],

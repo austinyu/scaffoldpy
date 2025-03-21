@@ -36,6 +36,26 @@
           ],
           "title": "Build Backend",
         },
+        "min_py_version": {
+          "title": "Min Py Version",
+          "type": "string",
+        },
+        "layout": {
+          "enum": [
+            "src",
+            "flat",
+          ],
+          "title": "Layout",
+          "type": "string",
+        },
+        "configuration_preference": {
+          "enum": [
+            "stand_alone",
+            "pyproject_toml",
+          ],
+          "title": "Configuration Preference",
+          "type": "string",
+        },
         "dependency_manager": {
           "enum": [
             "poetry",
@@ -134,6 +154,9 @@
         "project_name",
         "pkg_license",
         "build_backend",
+        "min_py_version",
+        "layout",
+        "configuration_preference",
         "dependency_manager",
         "static_code_checkers",
         "formatter",
@@ -147,6 +170,7 @@
       "type": "object",
     },
     "UserConfig": {
+      "description": "A configuration for a user.",
       "properties": {
         "author": {
           "title": "Author",
@@ -165,16 +189,10 @@
       "type": "object",
     },
   },
+  "description": "A configuration for a python project.",
   "properties": {
     "user_config": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/UserConfig",
-        },
-        {
-          "type": "null",
-        },
-      ],
+      "$ref": "#/$defs/UserConfig",
     },
     "project_config": {
       "$ref": "#/$defs/ProjectConfig",
