@@ -29,3 +29,6 @@ site/*
 .codspeed/*
 
 demo/*
+.venv/
+
+_version.py

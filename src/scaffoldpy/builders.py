@@ -5,7 +5,7 @@ from pathlib import Path
 
 import toml
 
-from . import consts, models
+from scaffoldpy import consts, models
 
 RUFF_CONFIG_CONTENT = f"""
 exclude = []
@@ -42,6 +42,16 @@ CODE_WORKSPACE_CONTENT = """{
     "settings": {
     }
 }
+
+"""
+
+PYTEST_ADDOPTS = (
+    "--cov . --cov-report xml:tests/.coverage/cov.xml --cov-report html:tests/.coverage/html"
+)
+
+PYTEST_CONFIG_CONTENT = f"""[pytest]
+; https://pytest-cov.readthedocs.io/en/latest/config.html
+addopts = {PYTEST_ADDOPTS}
 
 """
 
@@ -204,9 +214,34 @@ def build_formatter(config: models.Config, project_root: Path) -> None:
         toml.dump(project_toml, f)
 
 
+def build_tests(config: models.Config, project_root: Path) -> None:
+    """Build a test configuration file."""
+    if not config["project_config"]["include_tests"]:
+        return
+    tests_folder = project_root / "tests"
+    tests_folder.mkdir()
+    with open(tests_folder / "__init__.py", "w", encoding="utf-8") as f:
+        f.write("")
+
+    with open(project_root / consts.PYPROJECT_TOML_FNAME, "r", encoding="utf-8") as f:
+        project_toml: models.ProjectToml = toml.load(f)  # type: ignore
+
+    file_config: bool = config["project_config"]["configuration_preference"] == "stand_alone"
+
+    if file_config:
+        with open(tests_folder / "pytest.ini", "w", encoding="utf-8") as f:
+            f.write(PYTEST_CONFIG_CONTENT)
+    else:
+        project_toml["tool"]["pytest"] = {
+            "addopts": PYTEST_ADDOPTS,
+        }
+    with open(project_root / consts.PYPROJECT_TOML_FNAME, "w", encoding="utf-8") as f:
+        toml.dump(project_toml, f)
+
+
 def build_editor_config(config: models.Config, project_root: Path) -> None:
     """Build a code editor configuration file."""
-    if config["project_config"]["code_editor"] == "vs_code":
+    if config["project_config"]["code_editor"] == "vscode":
         with open(project_root / consts.SELF_WSP_FNAME, "w", encoding="utf-8") as f:
             f.write(CODE_WORKSPACE_CONTENT)
 
@@ -219,7 +254,7 @@ def build_docs(config: models.Config, project_root: Path) -> None:
         with open(project_root / "mkdocs.yml", "w", encoding="utf-8") as f:
             f.write("site_name: My Docs\n\n")
     elif config["project_config"]["docs"] == "sphinx":
-        pass
+        raise NotImplementedError("Sphinx documentation generation is not yet implemented.")
 
 
 def build_cloud_code_base(config: models.Config, project_root: Path) -> None:
@@ -255,10 +290,15 @@ def build_basic_project(config: models.Config) -> None:
     src_folder.mkdir(parents=True)
     with open(src_folder / "__init__.py", "w", encoding="utf-8") as f:
         f.write("")
-    tests_folder = project_root / "tests"
-    tests_folder.mkdir()
-    with open(tests_folder / "__init__.py", "w", encoding="utf-8") as f:
-        f.write("")
+
+    if config["project_config"]["include_tests"]:
+        tests_folder = project_root / "tests"
+        tests_folder.mkdir()
+        with open(tests_folder / "__init__.py", "w", encoding="utf-8") as f:
+            f.write("")
+
+        with open(src_folder / "pytest.ini", "w", encoding="utf-8") as f:
+            f.write(PYTEST_CONFIG_CONTENT)
 
     build_pre_commit_config(config, project_root)
 

@@ -42,9 +42,9 @@ def prompt_for_user_config() -> UserConfig:
     }
 
 
-def prompt_for_project_config(config: ProjectConfig) -> ProjectConfig:
+def prompt_for_project_config() -> ProjectConfig:
     """Prompt the user for configuration options."""
-
+    config: ProjectConfig = DEFAULT_PROJECT_CONFIG.copy()
     config["project_name"] = inquirer.text(
         message="🐍 What's your python project name:",
         validate=lambda result: len(result) > 0,
@@ -137,7 +137,7 @@ def prompt_for_project_config(config: ProjectConfig) -> ProjectConfig:
         instruction="Use space to select, up/down to move, enter to confirm.",
     ).execute()
 
-    config["formatter"] = inquirer.checkbox(
+    config["formatters"] = inquirer.checkbox(
         message="🎨 Select formatters for your project:",
         choices=[
             Choice(
@@ -290,7 +290,9 @@ def main() -> None:
     if main_args.parse_args().skip_config:
         build_basic_project(
             {
-                "user_config": user_config if user_config is not None else DEFAULT_USER_CONFIG,
+                "user_config": (
+                    user_config if user_config is not None else DEFAULT_USER_CONFIG
+                ),
                 "project_config": project_config,
             }
         )
@@ -298,7 +300,7 @@ def main() -> None:
 
     if user_config is None:
         user_config = prompt_for_user_config()
-        project_config = prompt_for_project_config(project_config)
+        project_config = prompt_for_project_config()
         dump_config(
             config_path,
             {
@@ -316,7 +318,7 @@ def main() -> None:
         ).execute()
         if not use_prev:
             print("No problem! Let's update your configuration. 🛠️")
-            project_config = prompt_for_project_config(project_config)
+            project_config = prompt_for_project_config()
             if not DEV_MODE:
                 save_config = inquirer.confirm(
                     message="💾 Would you like to save this configuration for future use?",

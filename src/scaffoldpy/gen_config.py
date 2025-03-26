@@ -9,9 +9,11 @@ from scaffoldpy.utils import dump_config, dump_schema
 if __name__ == "__main__":
     config_folder_path = Path(__file__).parent / consts.CONFIG_FOLDER
     config_folder_path.mkdir(parents=True, exist_ok=True)
-    dump_schema(config_folder_path / consts.SELF_CONFIG_SCHEMA_FNAME)
+    config_path: Path = config_folder_path / consts.SELF_CONFIG_FNAME
+    schema_path: Path = config_folder_path / consts.SELF_CONFIG_SCHEMA_FNAME
+    dump_schema(schema_path)
     dump_config(
-        config_folder_path / consts.SELF_CONFIG_FNAME,
+        config_path,
         {
             "user_config": {
                 "author": "",
@@ -20,4 +22,5 @@ if __name__ == "__main__":
             "project_config": DEFAULT_PROJECT_CONFIG,
         },
     )
-    print("✅ Configuration schema and default configuration updated.")
+    print(f"✅ Default configuration updated at {config_path}.")
+    print(f"✅ Configuration schema updated at {schema_path}.")

@@ -2,7 +2,8 @@
 # A comma-separated list of package or module names from where C extensions may be loaded.
 extension-pkg-whitelist=
 # List of modules to be ignored (as a comma-separated string)
-ignored-modules=InquirerPy
+ignored-modules=
+ignore=_version.py, .trunk
 
 [MESSAGES CONTROL]
 # Disable the following messages:

@@ -22,19 +22,20 @@ class ProjectConfig(TypedDict):
     )
     min_py_version: str
     layout: Literal["src", "flat"]
+    include_tests: bool
     configuration_preference: Literal["stand_alone", "pyproject_toml"]
     # dependency managers are used to manage your project's dependencies
     dependency_manager: Literal["poetry", "uv", "pipenv", "hatch"]
     # static code checkers are used to check your code for errors
     static_code_checkers: list[Literal["flake8", "mypy", "pyright", "pylint"]]
     # formatters are used to format your code
-    formatter: list[Literal["black", "ruff", "isort"]]
+    formatters: list[Literal["black", "ruff", "isort"]]
     # spell checkers are used to check spelling in your code
     spell_checker: Literal["cspell", "codespell"] | None
     # documentation generators are used to generate documentation for your project
     docs: Literal["mkdocs", "sphinx"] | None
     # code editors are used to edit your code
-    code_editor: Literal["vs_code"] | None
+    code_editor: Literal["vscode"] | None
     # pre-commit is used to run checks before committing code
     pre_commit: bool
     # cloud code bases are used to host your project's source code
@@ -68,14 +69,15 @@ DEFAULT_PROJECT_CONFIG: ProjectConfig = {
     "pkg_license": "MIT",
     "min_py_version": "3.10",
     "layout": "src",
+    "include_tests": True,
     "configuration_preference": "stand_alone",
     "build_backend": "Hatchling",
     "dependency_manager": "uv",
     "static_code_checkers": ["flake8", "mypy", "pyright", "pylint"],
-    "formatter": ["ruff", "isort"],
+    "formatters": ["ruff", "isort"],
     "spell_checker": "cspell",
     "docs": "mkdocs",
-    "code_editor": "vs_code",
+    "code_editor": "vscode",
     "pre_commit": True,
     "cloud_code_base": "github",
 }

@@ -5,18 +5,12 @@
       "properties": {
         "project_name": {
           "title": "Project Name",
-          "type": "string",
+          "type": "string"
         },
         "pkg_license": {
-          "enum": [
-            "MIT",
-            "GPL",
-            "Apache",
-            "BSD",
-            "Proprietary",
-          ],
+          "enum": ["MIT", "GPL", "Apache", "BSD", "Proprietary"],
           "title": "Pkg License",
-          "type": "string",
+          "type": "string"
         },
         "build_backend": {
           "anyOf": [
@@ -26,129 +20,107 @@
                 "Setuptools",
                 "Hatchling",
                 "PDM-backend",
-                "Flit-core",
+                "Flit-core"
               ],
-              "type": "string",
+              "type": "string"
             },
             {
-              "type": "null",
-            },
+              "type": "null"
+            }
           ],
-          "title": "Build Backend",
+          "title": "Build Backend"
         },
         "min_py_version": {
           "title": "Min Py Version",
-          "type": "string",
+          "type": "string"
         },
         "layout": {
-          "enum": [
-            "src",
-            "flat",
-          ],
+          "enum": ["src", "flat"],
           "title": "Layout",
-          "type": "string",
+          "type": "string"
+        },
+        "include_tests": {
+          "title": "Include Tests",
+          "type": "boolean"
         },
         "configuration_preference": {
-          "enum": [
-            "stand_alone",
-            "pyproject_toml",
-          ],
+          "enum": ["stand_alone", "pyproject_toml"],
           "title": "Configuration Preference",
-          "type": "string",
+          "type": "string"
         },
         "dependency_manager": {
-          "enum": [
-            "poetry",
-            "uv",
-            "pipenv",
-            "hatch",
-          ],
+          "enum": ["poetry", "uv", "pipenv", "hatch"],
           "title": "Dependency Manager",
-          "type": "string",
+          "type": "string"
         },
         "static_code_checkers": {
           "items": {
-            "enum": [
-              "flake8",
-              "mypy",
-              "pyright",
-              "pylint",
-            ],
-            "type": "string",
+            "enum": ["flake8", "mypy", "pyright", "pylint"],
+            "type": "string"
           },
           "title": "Static Code Checkers",
-          "type": "array",
+          "type": "array"
         },
         "formatter": {
           "items": {
-            "enum": [
-              "black",
-              "ruff",
-              "isort",
-            ],
-            "type": "string",
+            "enum": ["black", "ruff", "isort"],
+            "type": "string"
           },
           "title": "Formatter",
-          "type": "array",
+          "type": "array"
         },
         "spell_checker": {
           "anyOf": [
             {
-              "enum": [
-                "cspell",
-                "codespell",
-              ],
-              "type": "string",
+              "enum": ["cspell", "codespell"],
+              "type": "string"
             },
             {
-              "type": "null",
-            },
+              "type": "null"
+            }
           ],
-          "title": "Spell Checker",
+          "title": "Spell Checker"
         },
         "docs": {
           "anyOf": [
             {
-              "enum": [
-                "mkdocs",
-                "sphinx",
-              ],
-              "type": "string",
+              "enum": ["mkdocs", "sphinx"],
+              "type": "string"
             },
             {
-              "type": "null",
-            },
+              "type": "null"
+            }
           ],
-          "title": "Docs",
+          "title": "Docs"
         },
         "code_editor": {
           "anyOf": [
             {
-              "const": "vs_code",
-              "type": "string",
+              "const": "vscode",
+              "type": "string"
             },
             {
-              "type": "null",
-            },
+              "type": "null"
+            }
           ],
-          "title": "Code Editor",
+          "title": "Code Editor"
         },
         "pre_commit": {
           "title": "Pre Commit",
-          "type": "boolean",
+          "type": "boolean"
         },
         "cloud_code_base": {
           "anyOf": [
             {
               "const": "github",
-              "type": "string",
+              "type": "string"
             },
             {
-              "type": "null",
-            },
+              "type": "null"
+            }
           ],
-          "title": "Cloud Code Base",
-        },
+          "title": "Cloud Code Base"
+        }
       },
       "required": [
         "project_name",
@@ -156,6 +128,7 @@
         "build_backend",
         "min_py_version",
         "layout",
+        "include_tests",
         "configuration_preference",
         "dependency_manager",
         "static_code_checkers",
@@ -164,44 +137,38 @@
         "docs",
         "code_editor",
         "pre_commit",
-        "cloud_code_base",
+        "cloud_code_base"
       ],
       "title": "ProjectConfig",
-      "type": "object",
+      "type": "object"
     },
     "UserConfig": {
       "description": "A configuration for a user.",
       "properties": {
         "author": {
           "title": "Author",
-          "type": "string",
+          "type": "string"
         },
         "author_email": {
           "title": "Author Email",
-          "type": "string",
-        },
+          "type": "string"
+        }
       },
-      "required": [
-        "author",
-        "author_email",
-      ],
+      "required": ["author", "author_email"],
       "title": "UserConfig",
-      "type": "object",
-    },
+      "type": "object"
+    }
   },
   "description": "A configuration for a python project.",
   "properties": {
     "user_config": {
-      "$ref": "#/$defs/UserConfig",
+      "$ref": "#/$defs/UserConfig"
     },
     "project_config": {
-      "$ref": "#/$defs/ProjectConfig",
-    },
+      "$ref": "#/$defs/ProjectConfig"
+    }
   },
-  "required": [
-    "user_config",
-    "project_config",
-  ],
+  "required": ["user_config", "project_config"],
   "title": "Config",
-  "type": "object",
+  "type": "object"
 }
