@@ -48,6 +48,12 @@ class UserConfig(TypedDict):
     author_email: str
 
 
+DEFAULT_USER_CONFIG: UserConfig = {
+    "author": "AUTHOR",
+    "author_email": "AUTHOR_EMAIL@EMAIL.com",
+}
+
+
 class Config(TypedDict):
     """A configuration for a python project."""
 

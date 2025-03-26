@@ -1,11 +1,10 @@
 [build-system]
-requires = ['hatchling', "hatch-vcs"]
-build-backend = 'hatchling.build'
-
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "scaffoldpy"
-description = "A cli tool to create a Python project with best practices"
+description = "A CLI tool to create a Python project with best practices"
 authors = [{ name = "Austin Yu", email = "yuxm.austin1023@gmail.com" }]
 maintainers = [{ name = "Austin Yu", email = "yuxm.austin1023@gmail.com" }]
 license = { text = "MIT" }
@@ -19,25 +18,23 @@ dependencies = [
     "ujson5>=1.0.1",
 ]
 classifiers = []
-dynamic = ['version', 'readme']
+dynamic = ["version", "readme"]
 
 [project.scripts]
 scaffoldpy = "scaffoldpy.cli:main"
 
 [project.optional-dependencies]
 # Some dependencies are only needed for certain features
-# For example, you can define optional dependencies like this
-# ```
+# For example, you can define optional dependencies like this:
 # gui = ["PyQt5"]
 # cli = ["click"]
-# ```
 # Users can optionally install these dependencies by running `pip install package[gui]`
 # or `pip install package[cli]`
 
 [project.urls]
-Homepage = 'https://github.com/austinyu/scaffoldpy'
-# Documentation = 'https://austinyu.github.io/ujson5/'
-Source = 'https://github.com/austinyu/scaffoldpy'
+Homepage = "https://github.com/austinyu/scaffoldpy"
+# Documentation = "https://austinyu.github.io/ujson5/"
+Source = "https://github.com/austinyu/scaffoldpy"
 Issues = "https://todo.com"
 # Changelog = TBD
 
@@ -66,10 +63,7 @@ static_checkers = [
     "types-toml",
 ]
 
-formatters = [
-    "ruff",
-    "isort",
-]
+formatters = ["ruff", "isort"]
 
 docs = [
     "mkdocs",
@@ -85,24 +79,18 @@ all = [
     { include-group = "formatters" },
 ]
 
-
 [tool.uv]
-default-groups = ['all']
+default-groups = ["all"]
 
 [tool.hatch.version]
 source = "vcs"
 
 [tool.hatch.build.targets.sdist]
-include = [
-    '/README.md',
-    '/CHANGELOG.md',
-    '/src',
-    '/tests',
-]
+include = ["/README.md", "/CHANGELOG.md", "/src", "/tests"]
+exclude = ["/src/scaffoldpy/_dump_config.py"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/scaffoldpy"]
 
-
 [tool.coverage.report]
-exclude_also = ['pytest.skip']
+exclude_also = ["pytest.skip"]

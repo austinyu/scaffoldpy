@@ -2,10 +2,8 @@
 
 import argparse
 import os
-import sys
 from pathlib import Path
 
-import ujson5
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 from pydantic import ValidationError
@@ -14,11 +12,12 @@ from scaffoldpy import consts
 from scaffoldpy.builders import build_basic_project
 from scaffoldpy.models import (
     DEFAULT_PROJECT_CONFIG,
-    Config,
+    DEFAULT_USER_CONFIG,
     ProjectConfig,
     PydConfig,
     UserConfig,
 )
+from scaffoldpy.utils import dump_config, dump_schema
 
 DEV_MODE: bool = False
 
@@ -234,18 +233,6 @@ def _get_appdata_path() -> Path:
         raise OSError("Unsupported operating system")
 
 
-def dump_config(path: Path, config: Config) -> None:
-    """Dump the configuration to a file."""
-    with open(path, "w", encoding="utf8") as f:
-        ujson5.dump(config, f, Config, indent=2)
-
-
-def dump_schema(path: Path) -> None:
-    """Dump the schema to a file."""
-    with open(path, "w", encoding="utf8") as f:
-        ujson5.dump(PydConfig.json_schema(), f, indent=2)
-
-
 def copy_workspace_file(dest_folder: Path) -> None:
     """Copy a workspace file to the project directory."""
     workspace_file = Path(__file__).parent / consts.CONFIG_FOLDER / consts.SELF_WSP_FNAME
@@ -269,42 +256,46 @@ def main() -> None:
         help="Skip the configuration process and generate a basic project.",
     )
 
-    if main_args.parse_args().skip_config:
+    if DEV_MODE and main_args.parse_args().skip_config:
         build_basic_project(
             {
-                "user_config": {
-                    "author": "John",
-                    "author_email": "",
-                },
+                "user_config": DEFAULT_USER_CONFIG,
                 "project_config": DEFAULT_PROJECT_CONFIG,
             }
         )
         return
 
-    if DEV_MODE:
-        config_folder = Path(__file__).parent / consts.CONFIG_FOLDER
-        config_path = config_folder / consts.SELF_CONFIG_FNAME
-        user_config: UserConfig | None = None
-        project_config: ProjectConfig = DEFAULT_PROJECT_CONFIG.copy()
-    else:
-        config_folder = _get_appdata_path() / "create_py_project"
-        config_path = config_folder / consts.SELF_CONFIG_FNAME
-        try:
-            with open(config_path, "r", encoding="utf8") as f:
-                config = PydConfig.validate_json(f.read())
-                user_config = config["user_config"]
-            print(f"🌟 Welcome back {user_config['author']}!")
-        except FileNotFoundError:
-            print("👋 Looks like you're running this tool for the first time.")
-            print("Let's start by setting up your user configuration. 🛠️")
-            user_config = None
-            project_config = DEFAULT_PROJECT_CONFIG.copy()
-            copy_workspace_file(config_folder)
-        except ValidationError:
-            print("⚠️ Looks like your configuration file is corrupt.")
-            print("Don't worry! Let's set up your configuration again. 🛠️")
-            user_config = None
-            project_config = DEFAULT_PROJECT_CONFIG.copy()
+    config_folder = _get_appdata_path() / "create_py_project"
+    config_path = config_folder / consts.SELF_CONFIG_FNAME
+    try:
+        print(f"🚀 Trying to load config file from {config_path}...")
+        with open(config_path, "r", encoding="utf8") as f:
+            config = PydConfig.validate_json(f.read())
+            user_config: UserConfig | None = config["user_config"]
+            project_config: ProjectConfig = config["project_config"]
+        assert user_config is not None
+        print(f"🌟 Welcome back {user_config['author']}!")
+    except FileNotFoundError:
+        print("👋 Looks like you're running this tool for the first time.")
+        print("Let's start by setting up your user configuration. 🛠️")
+        user_config = None
+        project_config = DEFAULT_PROJECT_CONFIG.copy()
+        copy_workspace_file(config_folder)
+    except ValidationError:
+        print("⚠️ Looks like your configuration file is corrupt.")
+        print("Don't worry! Let's set up your configuration again. 🛠️")
+        user_config = None
+        project_config = DEFAULT_PROJECT_CONFIG.copy()
+
+    if main_args.parse_args().skip_config:
+        build_basic_project(
+            {
+                "user_config": user_config if user_config is not None else DEFAULT_USER_CONFIG,
+                "project_config": project_config,
+            }
+        )
+        return
+
     if user_config is None:
         user_config = prompt_for_user_config()
         project_config = prompt_for_project_config(project_config)
@@ -315,8 +306,9 @@ def main() -> None:
                 "project_config": project_config,
             },
         )
-        print(f"✅ Configuration saved at {config_path}.")
-        dump_schema(config_folder / consts.SELF_CONFIG_SCHEMA_FNAME)
+        if not DEV_MODE:
+            print(f"✅ Configuration saved at {config_path}.")
+            dump_schema(config_folder / consts.SELF_CONFIG_SCHEMA_FNAME)
     else:
         use_prev = inquirer.confirm(
             message="👀 Would you like to use your previous configuration?",
@@ -325,19 +317,20 @@ def main() -> None:
         if not use_prev:
             print("No problem! Let's update your configuration. 🛠️")
             project_config = prompt_for_project_config(project_config)
-            save_config = inquirer.confirm(
-                message="💾 Would you like to save this configuration for future use?",
-                default=True,
-            ).execute()
-            if save_config:
-                dump_config(
-                    config_path,
-                    {
-                        "user_config": user_config,
-                        "project_config": project_config,
-                    },
-                )
-                print(f"✅ Configuration saved at {config_path}.")
+            if not DEV_MODE:
+                save_config = inquirer.confirm(
+                    message="💾 Would you like to save this configuration for future use?",
+                    default=True,
+                ).execute()
+                if save_config:
+                    dump_config(
+                        config_path,
+                        {
+                            "user_config": user_config,
+                            "project_config": project_config,
+                        },
+                    )
+                    print(f"✅ Configuration saved at {config_path}.")
     build_basic_project(
         {
             "user_config": user_config,
@@ -348,36 +341,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     DEV_MODE = True
-
-    args = argparse.ArgumentParser()
-    args.add_argument(
-        "-u",
-        "--update",
-        action="store_true",
-        help="Update the configuration file and save configuration schema.",
-    )
-    args.add_argument(
-        "-s",
-        "--skip-config",
-        action="store_true",
-        help="Skip the configuration process and generate a basic project.",
-    )
-
-    parsed_args = args.parse_args()
-
-    if parsed_args.update:
-        config_folder_path = Path(__file__).parent / consts.CONFIG_FOLDER
-        config_folder_path.mkdir(parents=True, exist_ok=True)
-        dump_schema(config_folder_path / consts.SELF_CONFIG_SCHEMA_FNAME)
-        dump_config(
-            config_folder_path / consts.SELF_CONFIG_FNAME,
-            {
-                "user_config": {
-                    "author": "",
-                    "author_email": "",
-                },
-                "project_config": DEFAULT_PROJECT_CONFIG,
-            },
-        )
-        print("✅ Configuration schema and default configuration updated.")
-        sys.exit(0)
+    main()

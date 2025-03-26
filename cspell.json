@@ -8,13 +8,15 @@
     "src/scaffoldpy/_config/scaffoldpy.code-workspace",
     "src/scaffoldpy/_config/*.json5",
     "src/scaffoldpy/_config/*.json",
-    "scaffoldpy.code-workspace"
+    "scaffoldpy.code-workspace",
+    ".gitignore"
   ],
   "dictionaryDefinitions": [],
   "dictionaries": [],
   "words": [
     "addopts",
     "autoflake",
+    "buildapi",
     "codespell",
     "codspeed",
     "fstring",

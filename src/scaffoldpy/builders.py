@@ -49,10 +49,32 @@ CODE_WORKSPACE_CONTENT = """{
 def build_toml(config: models.Config) -> models.ProjectToml:
     """Build a pyproject.toml file from a configuration."""
     if config["project_config"]["build_backend"] is not None:
-        build_system: models.BuildSystem = {
-            "build-backend": config["project_config"]["build_backend"],
-            "requires": [config["project_config"]["build_backend"]],
-        }
+        if config["project_config"]["build_backend"] == "Setuptools":
+            build_system: models.BuildSystem = {
+                "build-backend": "setuptools.build_meta",
+                "requires": ["setuptools"],
+            }
+        elif config["project_config"]["build_backend"] == "Poetry-core":
+            build_system = {
+                "build-backend": "poetry.core.masonry.api",
+                "requires": ["poetry-core"],
+            }
+        elif config["project_config"]["build_backend"] == "Hatchling":
+            build_system = {
+                "requires": ["hatchling"],
+                "build-backend": "hatchling.build",
+            }
+        elif config["project_config"]["build_backend"] == "PDM-backend":
+            build_system = {"requires": ["pdm.backend"], "build-backend": "pdm.backend"}
+        elif config["project_config"]["build_backend"] == "Flit-core":
+            build_system = {
+                "requires": ["flit-core"],
+                "build-backend": "flit_core.buildapi",
+            }
+        else:
+            raise NotImplementedError(
+                f"Build backend {config['project_config']['build_backend']} not supported."
+            )
     else:
         build_system = {"requires": [], "build-backend": ""}
 
@@ -97,7 +119,9 @@ def build_toml(config: models.Config) -> models.ProjectToml:
         "tests": ["pytest"],
         "static_checkers": [*config["project_config"]["static_code_checkers"]],
         "formatters": [*config["project_config"]["formatter"]],
-        "docs": [config["project_config"]["docs"]] if config["project_config"]["docs"] else [],
+        "docs": (
+            [config["project_config"]["docs"]] if config["project_config"]["docs"] else []
+        ),
     }
 
     return {
@@ -188,6 +212,7 @@ def build_editor_config(config: models.Config, project_root: Path) -> None:
 
 
 def build_docs(config: models.Config, project_root: Path) -> None:
+    """Build a documentation configuration file."""
     if config["project_config"]["docs"] is None:
         return
     if config["project_config"]["docs"] == "mkdocs":
@@ -198,6 +223,7 @@ def build_docs(config: models.Config, project_root: Path) -> None:
 
 
 def build_cloud_code_base(config: models.Config, project_root: Path) -> None:
+    """Build a cloud code base configuration file."""
     if config["project_config"]["cloud_code_base"] is None:
         return
     if config["project_config"]["cloud_code_base"] == "github":
