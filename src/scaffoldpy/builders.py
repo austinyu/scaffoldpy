@@ -1,59 +1,13 @@
 """Builders for creating a new Python project."""
 
+import json
+import subprocess
 import sys
 from pathlib import Path
 
 import toml
 
-from scaffoldpy import consts, models
-
-RUFF_CONFIG_CONTENT = f"""
-exclude = []
-line-length = {consts.DEFAULT_RULER_LEN}
-indent-width = 4
-
-[lint]
-ignore = []
-
-[format]
-quote-style = \"double\"
-indent-style = \"space\"
-
-"""
-
-PRE_COMMIT_CONTENT = """repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-yaml
-      - id: check-toml
-      - id: check-added-large-files
-
-"""
-
-CODE_WORKSPACE_CONTENT = """{
-    "folders": [
-        {
-            "path": "."
-        }
-    ],
-    "settings": {
-    }
-}
-
-"""
-
-PYTEST_ADDOPTS = (
-    "--cov . --cov-report xml:tests/.coverage/cov.xml --cov-report html:tests/.coverage/html"
-)
-
-PYTEST_CONFIG_CONTENT = f"""[pytest]
-; https://pytest-cov.readthedocs.io/en/latest/config.html
-addopts = {PYTEST_ADDOPTS}
-
-"""
+from scaffoldpy import consts, models, templates
 
 
 def build_toml(config: models.Config) -> models.ProjectToml:
@@ -128,17 +82,33 @@ def build_toml(config: models.Config) -> models.ProjectToml:
     dependency_groups: models.Dependencies = {
         "tests": ["pytest"],
         "static_checkers": [*config["project_config"]["static_code_checkers"]],
-        "formatters": [*config["project_config"]["formatter"]],
+        "formatters": [*config["project_config"]["formatters"]],
         "docs": (
             [config["project_config"]["docs"]] if config["project_config"]["docs"] else []
         ),
     }
 
+    tool_config: dict[str, dict] = {}
+    if config["project_config"]["build_backend"] == "Hatchling":
+        tool_config["hatch"] = {
+            "build": {
+                "targets": {
+                    "sdist": {
+                        "include": ["README.md", "LICENSE", "CHANGELOG.md"],
+                        "exclude": [],
+                    },
+                    "wheel": {
+                        "packages": [f"src/{config['project_config']['project_name']}"],
+                    },
+                }
+            }
+        }
+
     return {
         "build-system": build_system,
         "project": project,
         "dependency-groups": dependency_groups,
-        "tool": {},
+        "tool": tool_config,
     }
 
 
@@ -146,7 +116,7 @@ def build_pre_commit_config(config: models.Config, project_root: Path) -> None:
     """Build a pre-commit configuration file."""
     if config["project_config"]["pre_commit"]:
         with open(project_root / ".pre-commit-config.yaml", "w", encoding="utf-8") as f:
-            f.write(PRE_COMMIT_CONTENT)
+            f.write(templates.PRE_COMMIT_CONTENT)
 
 
 def build_static_checkers(config: models.Config, project_root: Path) -> None:
@@ -190,10 +160,10 @@ def build_formatter(config: models.Config, project_root: Path) -> None:
         project_toml: models.ProjectToml = toml.load(f)  # type: ignore
 
     file_config: bool = config["project_config"]["configuration_preference"] == "stand_alone"
-    if "ruff" in config["project_config"]["formatter"]:
+    if "ruff" in config["project_config"]["formatters"]:
         if file_config:
             with open(project_root / "ruff.toml", "w", encoding="utf-8") as f:
-                f.write(RUFF_CONFIG_CONTENT)
+                f.write(templates.RUFF_CONFIG_CONTENT)
         else:
             project_toml["tool"]["ruff"] = {
                 "exclude": [],
@@ -203,12 +173,16 @@ def build_formatter(config: models.Config, project_root: Path) -> None:
                 "format": {"quote-style": "double", "indent-style": "space"},
             }
 
-    if "isort" in config["project_config"]["formatter"]:
+    if "isort" in config["project_config"]["formatters"]:
         if file_config:
             with open(project_root / ".isort.cfg", "w", encoding="utf-8") as f:
-                f.write("[settings]\n\n")
+                f.write("[settings]\nprofile=black\n\n")
         else:
-            project_toml["tool"]["isort"] = {}
+            project_toml["tool"]["isort"] = {
+                "profile": "black",
+                "line_length": consts.DEFAULT_RULER_LEN,
+                "indent": 4,
+            }
 
     with open(project_root / consts.PYPROJECT_TOML_FNAME, "w", encoding="utf-8") as f:
         toml.dump(project_toml, f)
@@ -216,8 +190,6 @@ def build_formatter(config: models.Config, project_root: Path) -> None:
 
 def build_tests(config: models.Config, project_root: Path) -> None:
     """Build a test configuration file."""
-    if not config["project_config"]["include_tests"]:
-        return
     tests_folder = project_root / "tests"
     tests_folder.mkdir()
     with open(tests_folder / "__init__.py", "w", encoding="utf-8") as f:
@@ -229,12 +201,10 @@ def build_tests(config: models.Config, project_root: Path) -> None:
     file_config: bool = config["project_config"]["configuration_preference"] == "stand_alone"
 
     if file_config:
-        with open(tests_folder / "pytest.ini", "w", encoding="utf-8") as f:
-            f.write(PYTEST_CONFIG_CONTENT)
+        with open(project_root / "pytest.ini", "w", encoding="utf-8") as f:
+            f.write(templates.PYTEST_CONFIG_CONTENT)
     else:
-        project_toml["tool"]["pytest"] = {
-            "addopts": PYTEST_ADDOPTS,
-        }
+        project_toml["tool"]["pytest"] = {"addopts": templates.PYTEST_ADDOPTS}
     with open(project_root / consts.PYPROJECT_TOML_FNAME, "w", encoding="utf-8") as f:
         toml.dump(project_toml, f)
 
@@ -242,19 +212,31 @@ def build_tests(config: models.Config, project_root: Path) -> None:
 def build_editor_config(config: models.Config, project_root: Path) -> None:
     """Build a code editor configuration file."""
     if config["project_config"]["code_editor"] == "vscode":
-        with open(project_root / consts.SELF_WSP_FNAME, "w", encoding="utf-8") as f:
-            f.write(CODE_WORKSPACE_CONTENT)
+        with open(
+            project_root / f"{config['project_config']['project_name']}.code-workspace",
+            "w",
+            encoding="utf-8",
+        ) as f:
+            json.dump(templates.CODE_WORKSPACE_CONTENT, f, indent=2)
 
 
 def build_docs(config: models.Config, project_root: Path) -> None:
     """Build a documentation configuration file."""
+    docs_config: str | None = config["project_config"]["docs"]
     if config["project_config"]["docs"] is None:
         return
-    if config["project_config"]["docs"] == "mkdocs":
+    if docs_config == "mkdocs":
         with open(project_root / "mkdocs.yml", "w", encoding="utf-8") as f:
-            f.write("site_name: My Docs\n\n")
-    elif config["project_config"]["docs"] == "sphinx":
-        raise NotImplementedError("Sphinx documentation generation is not yet implemented.")
+            f.write(templates.build_mk_docs_config(config["project_config"]["project_name"]))
+        docs_folder = project_root / "docs"
+        docs_folder.mkdir()
+        with open(docs_folder / "index.md", "w", encoding="utf-8") as f:
+            f.write("# Documentation\n\n")
+            f.write("This is the documentation for your project.\n\n")
+    else:
+        raise NotImplementedError(
+            f"{docs_config} documentation generation is not yet implemented."
+        )
 
 
 def build_cloud_code_base(config: models.Config, project_root: Path) -> None:
@@ -264,8 +246,51 @@ def build_cloud_code_base(config: models.Config, project_root: Path) -> None:
     if config["project_config"]["cloud_code_base"] == "github":
         action_path = project_root / ".github" / "workflows"
         action_path.mkdir(parents=True)
-        with open(project_root / ".github/workflows/main.yml", "w", encoding="utf-8") as f:
-            f.write("name: CI\n\n")
+        with open(project_root / ".github/workflows/ci.yml", "w", encoding="utf-8") as f:
+            f.write(templates.build_gh_action_ci(config["project_config"]["min_py_version"]))
+        with open(project_root / ".github/workflows/release.yml", "w", encoding="utf-8") as f:
+            f.write(
+                templates.build_gh_action_release(config["project_config"]["project_name"])
+            )
+
+
+def build_vcs(project_root: Path) -> None:
+    """Build a version control system configuration file."""
+    # Create .gitignore file
+    with open(project_root / ".gitignore", "w", encoding="utf-8") as f:
+        f.write(templates.GITIGNORE_CONTENT)
+    try:
+        subprocess.run(
+            ["git", "init"],
+            cwd=project_root,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        subprocess.run(
+            ["git", "add", "."],
+            cwd=project_root,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        subprocess.run(
+            ["git", "commit", "-m", "init"],
+            cwd=project_root,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        subprocess.run(
+            ["git", "branch", "-M", "main"],
+            cwd=project_root,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"⚠️ Failed to initialize git repository: {e}")
+    print(f"📦 Git repository initialized at {project_root}.")
 
 
 def build_basic_project(config: models.Config) -> None:
@@ -282,7 +307,8 @@ def build_basic_project(config: models.Config) -> None:
         toml.dump(project_toml, f)
 
     with open(project_root / consts.README_FNAME, "w", encoding="utf-8") as f:
-        f.write(f"# {config['project_config']['project_name']}\n\n")
+        f.write(templates.build_readme(config["project_config"]["project_name"]))
+
     if config["project_config"]["layout"] == "flat":
         src_folder = project_root / config["project_config"]["project_name"]
     else:
@@ -291,14 +317,7 @@ def build_basic_project(config: models.Config) -> None:
     with open(src_folder / "__init__.py", "w", encoding="utf-8") as f:
         f.write("")
 
-    if config["project_config"]["include_tests"]:
-        tests_folder = project_root / "tests"
-        tests_folder.mkdir()
-        with open(tests_folder / "__init__.py", "w", encoding="utf-8") as f:
-            f.write("")
-
-        with open(src_folder / "pytest.ini", "w", encoding="utf-8") as f:
-            f.write(PYTEST_CONFIG_CONTENT)
+    build_tests(config, project_root)
 
     build_pre_commit_config(config, project_root)
 
@@ -307,5 +326,6 @@ def build_basic_project(config: models.Config) -> None:
     build_editor_config(config, project_root)
     build_docs(config, project_root)
     build_cloud_code_base(config, project_root)
+    build_vcs(project_root)
 
     print(f"🎉 Project {config['project_config']['project_name']} created successfully.")

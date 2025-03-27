@@ -39,10 +39,6 @@
           "title": "Layout",
           "type": "string"
         },
-        "include_tests": {
-          "title": "Include Tests",
-          "type": "boolean"
-        },
         "configuration_preference": {
           "enum": ["stand_alone", "pyproject_toml"],
           "title": "Configuration Preference",
@@ -128,7 +124,6 @@
         "build_backend",
         "min_py_version",
         "layout",
-        "include_tests",
         "configuration_preference",
         "dependency_manager",
         "static_code_checkers",

@@ -2,8 +2,10 @@
 
 import argparse
 import os
+import sys
 from pathlib import Path
 
+import ujson5
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 from pydantic import ValidationError
@@ -12,18 +14,38 @@ from scaffoldpy import consts
 from scaffoldpy.builders import build_basic_project
 from scaffoldpy.models import (
     DEFAULT_PROJECT_CONFIG,
-    DEFAULT_USER_CONFIG,
     ProjectConfig,
     PydConfig,
     UserConfig,
+    get_user_config,
 )
 from scaffoldpy.utils import dump_config, dump_schema
 
-DEV_MODE: bool = False
+MAIN_ARGS = argparse.ArgumentParser()
+MAIN_ARGS.add_argument(
+    "project_name",
+    type=str,
+    nargs="?",
+    help="The name of the project to be created.",
+)
+MAIN_ARGS.add_argument(
+    "-s",
+    "--skip-config",
+    action="store_true",
+    help="Skip the configuration process and generate a basic project.",
+)
 
 
-def prompt_for_user_config() -> UserConfig:
+def prompt_for_user_config(git_user_config: UserConfig | None) -> UserConfig:
     """Prompt the user for configuration options."""
+    if git_user_config is not None:
+        print(
+            f"🎉 Good news {git_user_config['author']}! We found your git user"
+            + f" configuration with email {git_user_config['author_email']}."
+        )
+        return git_user_config
+    print("We could not find your git user configuration.")
+    print("Let's set up your user configuration. 🛠️")
     author: str = inquirer.text(
         message="👤 What's your name:",
         validate=lambda result: len(result) > 0,
@@ -42,14 +64,29 @@ def prompt_for_user_config() -> UserConfig:
     }
 
 
-def prompt_for_project_config() -> ProjectConfig:
-    """Prompt the user for configuration options."""
-    config: ProjectConfig = DEFAULT_PROJECT_CONFIG.copy()
-    config["project_name"] = inquirer.text(
+def prompt_for_project_name() -> str:
+    """Prompt the user for the project name."""
+    project_name: str = inquirer.text(
         message="🐍 What's your python project name:",
         validate=lambda result: len(result) > 0,
         invalid_message="Project name cannot be empty.",
     ).execute()
+    return project_name
+
+
+def prompt_for_project_config(project_name: str | None) -> ProjectConfig:
+    """Prompt the user for configuration options."""
+    config: ProjectConfig = DEFAULT_PROJECT_CONFIG.copy()
+    config["project_name"] = (
+        project_name if project_name is not None else prompt_for_project_name()
+    )
+
+    use_default: bool = inquirer.confirm(
+        message="⚙️ Would you like to use the default configuration?",
+        default=True,
+    ).execute()
+    if use_default:
+        return config
 
     config["min_py_version"] = inquirer.select(
         message="🐍 Select the minimum python version for your project:",
@@ -248,59 +285,72 @@ def copy_workspace_file(dest_folder: Path) -> None:
 
 def main() -> None:
     """Main entry point for the CLI tool."""
-    main_args = argparse.ArgumentParser()
-    main_args.add_argument(
-        "-s",
-        "--skip-config",
-        action="store_true",
-        help="Skip the configuration process and generate a basic project.",
-    )
 
-    if DEV_MODE and main_args.parse_args().skip_config:
-        build_basic_project(
-            {
-                "user_config": DEFAULT_USER_CONFIG,
-                "project_config": DEFAULT_PROJECT_CONFIG,
-            }
-        )
-        return
-
-    config_folder = _get_appdata_path() / "create_py_project"
+    config_folder = _get_appdata_path() / "scaffoldpy"
+    config_folder.mkdir(parents=True, exist_ok=True)
     config_path = config_folder / consts.SELF_CONFIG_FNAME
+    project_name: str | None = MAIN_ARGS.parse_args().project_name
+    update_needed: bool = False
+    git_user_config: UserConfig | None = get_user_config()
     try:
         print(f"🚀 Trying to load config file from {config_path}...")
         with open(config_path, "r", encoding="utf8") as f:
-            config = PydConfig.validate_json(f.read())
-            user_config: UserConfig | None = config["user_config"]
+            config = PydConfig.validate_python(ujson5.load(f))
+            user_config: UserConfig = config["user_config"]
             project_config: ProjectConfig = config["project_config"]
-        assert user_config is not None
         print(f"🌟 Welcome back {user_config['author']}!")
+        if git_user_config is not None and user_config != git_user_config:
+            print(
+                "⚠️ Looks like your git user configuration is different from your "
+                + "saved configuration."
+            )
+            update_user_config: bool = inquirer.confirm(
+                message=(
+                    "🔄 Would you like to update your user configuration to "
+                    + f"{git_user_config['author']} with {git_user_config['author_email']}?"
+                ),
+                default=True,
+            ).execute()
+            if update_user_config:
+                user_config = git_user_config
+        if MAIN_ARGS.parse_args().skip_config:
+            _project_name: str = (
+                project_name if project_name is not None else prompt_for_project_name()
+            )
+            project_config["project_name"] = _project_name
+            print("👋 Skipping configuration process.")
+            build_basic_project(
+                {
+                    "user_config": user_config,
+                    "project_config": project_config,
+                }
+            )
+            return
+        use_prev = inquirer.confirm(
+            message="👀 Would you like to use your previous configuration?",
+            default=True,
+        ).execute()
+        if not use_prev:
+            print("No problem! Let's update your configuration. 🛠️")
+            project_config = prompt_for_project_config(project_name)
+            update_needed = inquirer.confirm(
+                message="💾 Would you like to save this configuration for future use?",
+                default=True,
+            ).execute()
     except FileNotFoundError:
         print("👋 Looks like you're running this tool for the first time.")
-        print("Let's start by setting up your user configuration. 🛠️")
-        user_config = None
-        project_config = DEFAULT_PROJECT_CONFIG.copy()
-        copy_workspace_file(config_folder)
+        user_config = prompt_for_user_config(git_user_config)
+        project_config = prompt_for_project_config(project_name)
+        update_needed = True
+
     except ValidationError:
         print("⚠️ Looks like your configuration file is corrupt.")
         print("Don't worry! Let's set up your configuration again. 🛠️")
-        user_config = None
-        project_config = DEFAULT_PROJECT_CONFIG.copy()
+        user_config = prompt_for_user_config(git_user_config)
+        project_config = prompt_for_project_config(project_name)
+        update_needed = True
 
-    if main_args.parse_args().skip_config:
-        build_basic_project(
-            {
-                "user_config": (
-                    user_config if user_config is not None else DEFAULT_USER_CONFIG
-                ),
-                "project_config": project_config,
-            }
-        )
-        return
-
-    if user_config is None:
-        user_config = prompt_for_user_config()
-        project_config = prompt_for_project_config()
+    if update_needed:
         dump_config(
             config_path,
             {
@@ -308,31 +358,10 @@ def main() -> None:
                 "project_config": project_config,
             },
         )
-        if not DEV_MODE:
-            print(f"✅ Configuration saved at {config_path}.")
-            dump_schema(config_folder / consts.SELF_CONFIG_SCHEMA_FNAME)
-    else:
-        use_prev = inquirer.confirm(
-            message="👀 Would you like to use your previous configuration?",
-            default=True,
-        ).execute()
-        if not use_prev:
-            print("No problem! Let's update your configuration. 🛠️")
-            project_config = prompt_for_project_config()
-            if not DEV_MODE:
-                save_config = inquirer.confirm(
-                    message="💾 Would you like to save this configuration for future use?",
-                    default=True,
-                ).execute()
-                if save_config:
-                    dump_config(
-                        config_path,
-                        {
-                            "user_config": user_config,
-                            "project_config": project_config,
-                        },
-                    )
-                    print(f"✅ Configuration saved at {config_path}.")
+        print(f"✅ Configuration saved at {config_path}.")
+        dump_schema(config_folder / consts.SELF_CONFIG_SCHEMA_FNAME)
+        copy_workspace_file(config_folder)
+
     build_basic_project(
         {
             "user_config": user_config,
@@ -342,5 +371,25 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    DEV_MODE = True
-    main()
+    main_project_name: str | None = MAIN_ARGS.parse_args().project_name
+    main_git_user_config: UserConfig = get_user_config() or {"author": "", "author_email": ""}
+    if MAIN_ARGS.parse_args().skip_config:
+        main_project_config = DEFAULT_PROJECT_CONFIG.copy()
+        if main_project_name is not None:
+            main_project_config["project_name"] = main_project_name
+        build_basic_project(
+            {
+                "user_config": main_git_user_config,
+                "project_config": main_project_config,
+            }
+        )
+        sys.exit(0)
+    main_user_config = main_git_user_config
+    main_project_config = prompt_for_project_config(main_project_name)
+
+    build_basic_project(
+        {
+            "user_config": main_user_config,
+            "project_config": main_project_config,
+        }
+    )

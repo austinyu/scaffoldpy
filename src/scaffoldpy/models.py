@@ -1,5 +1,6 @@
 """Models for the create_py_project package."""
 
+import subprocess
 import sys
 from typing import Any, Literal
 
@@ -22,7 +23,6 @@ class ProjectConfig(TypedDict):
     )
     min_py_version: str
     layout: Literal["src", "flat"]
-    include_tests: bool
     configuration_preference: Literal["stand_alone", "pyproject_toml"]
     # dependency managers are used to manage your project's dependencies
     dependency_manager: Literal["poetry", "uv", "pipenv", "hatch"]
@@ -49,10 +49,20 @@ class UserConfig(TypedDict):
     author_email: str
 
 
-DEFAULT_USER_CONFIG: UserConfig = {
-    "author": "AUTHOR",
-    "author_email": "AUTHOR_EMAIL@EMAIL.com",
-}
+def get_user_config() -> UserConfig | None:
+    """Get the user configuration from the system."""
+    try:
+        author = subprocess.check_output(
+            ["git", "config", "--get", "user.name"], text=True
+        ).strip()
+        author_email = subprocess.check_output(
+            ["git", "config", "--get", "user.email"], text=True
+        ).strip()
+    except subprocess.CalledProcessError:
+        # If git is not installed or the user is not configured, return None
+        return None
+
+    return {"author": author, "author_email": author_email}
 
 
 class Config(TypedDict):
@@ -69,7 +79,6 @@ DEFAULT_PROJECT_CONFIG: ProjectConfig = {
     "pkg_license": "MIT",
     "min_py_version": "3.10",
     "layout": "src",
-    "include_tests": True,
     "configuration_preference": "stand_alone",
     "build_backend": "Hatchling",
     "dependency_manager": "uv",

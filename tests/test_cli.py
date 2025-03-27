@@ -17,7 +17,7 @@ def test_prompt_for_user_config(mocker):
     ]
 
     # Call the function
-    result = prompt_for_user_config()
+    result = prompt_for_user_config(None)
 
     # Assert the result
     assert result == {
@@ -55,7 +55,7 @@ def test_prompt_for_project_config(mocker):
     ]
 
     # Call the function
-    result = prompt_for_project_config()
+    result = prompt_for_project_config(None)
 
     # Assert the result
     assert result == DEFAULT_PROJECT_CONFIG

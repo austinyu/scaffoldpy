@@ -8,9 +8,9 @@
         "json5.schemas": [
             {
                 "fileMatch": [
-                    "config_create_py_project.json5"
+                    "config_scaffoldpy.json5"
                 ],
-                "url": "./schema_create_py_project.json"
+                "url": "./schema_scaffoldpy.json"
             }
         ],
         "files.associations": {

@@ -8,7 +8,6 @@
     "pkg_license": "MIT",
     "min_py_version": "3.10",
     "layout": "src",
-    "include_tests": true,
     "configuration_preference": "stand_alone",
     // build backends are used to build and distribute your project as a package
     "build_backend": "Hatchling",
