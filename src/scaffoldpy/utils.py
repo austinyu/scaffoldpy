@@ -4,7 +4,7 @@ from pathlib import Path
 
 import ujson5
 
-from scaffoldpy.models import Config, PydConfig
+from scaffoldpy.configs import Config, PydConfig
 
 
 def dump_config(path: Path, config: Config) -> None:

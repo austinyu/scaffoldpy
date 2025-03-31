@@ -12,7 +12,7 @@ from pydantic import ValidationError
 
 from scaffoldpy import consts
 from scaffoldpy.builders import build_basic_project
-from scaffoldpy.models import (
+from scaffoldpy.configs import (
     DEFAULT_PROJECT_CONFIG,
     ProjectConfig,
     PydConfig,

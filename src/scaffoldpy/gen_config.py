@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from scaffoldpy import consts
-from scaffoldpy.models import DEFAULT_PROJECT_CONFIG
+from scaffoldpy.configs import DEFAULT_PROJECT_CONFIG
 from scaffoldpy.utils import dump_config, dump_schema
 
 if __name__ == "__main__":

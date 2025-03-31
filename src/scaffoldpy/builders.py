@@ -7,14 +7,14 @@ from pathlib import Path
 
 import toml
 
-from scaffoldpy import consts, models, templates
+from scaffoldpy import configs, consts, templates
 
 
-def build_toml(config: models.Config) -> models.ProjectToml:
+def build_toml(config: configs.Config) -> configs.ProjectToml:
     """Build a pyproject.toml file from a configuration."""
     if config["project_config"]["build_backend"] is not None:
         if config["project_config"]["build_backend"] == "Setuptools":
-            build_system: models.BuildSystem = {
+            build_system: configs.BuildSystem = {
                 "build-backend": "setuptools.build_meta",
                 "requires": ["setuptools"],
             }
@@ -42,7 +42,7 @@ def build_toml(config: models.Config) -> models.ProjectToml:
     else:
         build_system = {"requires": [], "build-backend": ""}
 
-    project: models.ProjectTable = {
+    project: configs.ProjectTable = {
         "name": config["project_config"]["project_name"],
         "version": "0.0.0",
         "description": "",
@@ -79,7 +79,7 @@ def build_toml(config: models.Config) -> models.ProjectToml:
         "dynamic": [],
     }
 
-    dependency_groups: models.Dependencies = {
+    dependency_groups: configs.Dependencies = {
         "tests": ["pytest"],
         "static_checkers": [*config["project_config"]["static_code_checkers"]],
         "formatters": [*config["project_config"]["formatters"]],
@@ -112,17 +112,17 @@ def build_toml(config: models.Config) -> models.ProjectToml:
     }
 
 
-def build_pre_commit_config(config: models.Config, project_root: Path) -> None:
+def build_pre_commit_config(config: configs.Config, project_root: Path) -> None:
     """Build a pre-commit configuration file."""
     if config["project_config"]["pre_commit"]:
         with open(project_root / ".pre-commit-config.yaml", "w", encoding="utf-8") as f:
             f.write(templates.PRE_COMMIT_CONTENT)
 
 
-def build_static_checkers(config: models.Config, project_root: Path) -> None:
+def build_static_checkers(config: configs.Config, project_root: Path) -> None:
     """Build static code checkers configuration files."""
     with open(project_root / consts.PYPROJECT_TOML_FNAME, "r", encoding="utf-8") as f:
-        project_toml: models.ProjectToml = toml.load(f)  # type: ignore
+        project_toml: config.ProjectToml = toml.load(f)  # type: ignore
 
     file_config: bool = config["project_config"]["configuration_preference"] == "stand_alone"
     if "flake8" in config["project_config"]["static_code_checkers"]:
@@ -154,10 +154,10 @@ def build_static_checkers(config: models.Config, project_root: Path) -> None:
         toml.dump(project_toml, f)
 
 
-def build_formatter(config: models.Config, project_root: Path) -> None:
+def build_formatter(config: configs.Config, project_root: Path) -> None:
     """Build a formatter configuration file."""
     with open(project_root / consts.PYPROJECT_TOML_FNAME, "r", encoding="utf-8") as f:
-        project_toml: models.ProjectToml = toml.load(f)  # type: ignore
+        project_toml: config.ProjectToml = toml.load(f)  # type: ignore
 
     file_config: bool = config["project_config"]["configuration_preference"] == "stand_alone"
     if "ruff" in config["project_config"]["formatters"]:
@@ -188,7 +188,7 @@ def build_formatter(config: models.Config, project_root: Path) -> None:
         toml.dump(project_toml, f)
 
 
-def build_tests(config: models.Config, project_root: Path) -> None:
+def build_tests(config: configs.Config, project_root: Path) -> None:
     """Build a test configuration file."""
     tests_folder = project_root / "tests"
     tests_folder.mkdir()
@@ -196,7 +196,7 @@ def build_tests(config: models.Config, project_root: Path) -> None:
         f.write("")
 
     with open(project_root / consts.PYPROJECT_TOML_FNAME, "r", encoding="utf-8") as f:
-        project_toml: models.ProjectToml = toml.load(f)  # type: ignore
+        project_toml: config.ProjectToml = toml.load(f)  # type: ignore
 
     file_config: bool = config["project_config"]["configuration_preference"] == "stand_alone"
 
@@ -209,7 +209,7 @@ def build_tests(config: models.Config, project_root: Path) -> None:
         toml.dump(project_toml, f)
 
 
-def build_editor_config(config: models.Config, project_root: Path) -> None:
+def build_editor_config(config: configs.Config, project_root: Path) -> None:
     """Build a code editor configuration file."""
     if config["project_config"]["code_editor"] == "vscode":
         with open(
@@ -220,7 +220,7 @@ def build_editor_config(config: models.Config, project_root: Path) -> None:
             json.dump(templates.CODE_WORKSPACE_CONTENT, f, indent=2)
 
 
-def build_docs(config: models.Config, project_root: Path) -> None:
+def build_docs(config: configs.Config, project_root: Path) -> None:
     """Build a documentation configuration file."""
     docs_config: str | None = config["project_config"]["docs"]
     if config["project_config"]["docs"] is None:
@@ -239,7 +239,7 @@ def build_docs(config: models.Config, project_root: Path) -> None:
         )
 
 
-def build_cloud_code_base(config: models.Config, project_root: Path) -> None:
+def build_cloud_code_base(config: configs.Config, project_root: Path) -> None:
     """Build a cloud code base configuration file."""
     if config["project_config"]["cloud_code_base"] is None:
         return
@@ -293,7 +293,7 @@ def build_vcs(project_root: Path) -> None:
     print(f"📦 Git repository initialized at {project_root}.")
 
 
-def build_basic_project(config: models.Config) -> None:
+def build_basic_project(config: configs.Config) -> None:
     """Build a basic Python project."""
     print("🚧 Building your project...")
     project_root = consts.CWD / config["project_config"]["project_name"]
@@ -301,7 +301,7 @@ def build_basic_project(config: models.Config) -> None:
         print(f"🚨 Project directory {project_root} already exists and is not empty.")
         sys.exit(1)
 
-    project_toml: models.ProjectToml = build_toml(config)
+    project_toml: configs.ProjectToml = build_toml(config)
     project_root.mkdir()
     with open(project_root / consts.PYPROJECT_TOML_FNAME, "w", encoding="utf-8") as f:
         toml.dump(project_toml, f)
@@ -309,10 +309,11 @@ def build_basic_project(config: models.Config) -> None:
     with open(project_root / consts.README_FNAME, "w", encoding="utf-8") as f:
         f.write(templates.build_readme(config["project_config"]["project_name"]))
 
+    project_folder_name: str = config["project_config"]["project_name"].replace("-", "_")
     if config["project_config"]["layout"] == "flat":
-        src_folder = project_root / config["project_config"]["project_name"]
+        src_folder = project_root / project_folder_name
     else:
-        src_folder = project_root / "src" / config["project_config"]["project_name"]
+        src_folder = project_root / "src" / project_folder_name
     src_folder.mkdir(parents=True)
     with open(src_folder / "__init__.py", "w", encoding="utf-8") as f:
         f.write("")

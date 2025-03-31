@@ -4,7 +4,7 @@ from scaffoldpy.cli import (
     prompt_for_project_config,
     prompt_for_user_config,
 )
-from scaffoldpy.models import DEFAULT_PROJECT_CONFIG
+from scaffoldpy.configs import DEFAULT_PROJECT_CONFIG
 
 
 def test_prompt_for_user_config(mocker):
