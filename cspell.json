@@ -28,6 +28,7 @@
     "mkdocstrings",
     "mypy",
     "nosetests",
+    "popleft",
     "pydantic",
     "pylint",
     "pylintrc",
