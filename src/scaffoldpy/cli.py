@@ -298,6 +298,18 @@ def main() -> None:
             config = PydConfig.validate_python(ujson5.load(f))
             user_config: UserConfig = config["user_config"]
             project_config: ProjectConfig = config["project_config"]
+    except FileNotFoundError:
+        print("👋 Looks like you're running this tool for the first time.")
+        user_config = prompt_for_user_config(git_user_config)
+        project_config = prompt_for_project_config(project_name)
+        update_needed = True
+    except ValidationError:
+        print("⚠️ Looks like your configuration file is corrupt.")
+        print("Don't worry! Let's set up your configuration again. 🛠️")
+        user_config = prompt_for_user_config(git_user_config)
+        project_config = prompt_for_project_config(project_name)
+        update_needed = True
+    else:
         print(f"🌟 Welcome back {user_config['author']}!")
         if git_user_config is not None and user_config != git_user_config:
             print(
@@ -313,11 +325,11 @@ def main() -> None:
             ).execute()
             if update_user_config:
                 user_config = git_user_config
+        _project_name: str = (
+            project_name if project_name is not None else prompt_for_project_name()
+        )
+        project_config["project_name"] = _project_name
         if MAIN_ARGS.parse_args().skip_config:
-            _project_name: str = (
-                project_name if project_name is not None else prompt_for_project_name()
-            )
-            project_config["project_name"] = _project_name
             print("👋 Skipping configuration process.")
             build_basic_project(
                 {
@@ -337,18 +349,6 @@ def main() -> None:
                 message="💾 Would you like to save this configuration for future use?",
                 default=True,
             ).execute()
-    except FileNotFoundError:
-        print("👋 Looks like you're running this tool for the first time.")
-        user_config = prompt_for_user_config(git_user_config)
-        project_config = prompt_for_project_config(project_name)
-        update_needed = True
-
-    except ValidationError:
-        print("⚠️ Looks like your configuration file is corrupt.")
-        print("Don't worry! Let's set up your configuration again. 🛠️")
-        user_config = prompt_for_user_config(git_user_config)
-        project_config = prompt_for_project_config(project_name)
-        update_needed = True
 
     if update_needed:
         dump_config(
